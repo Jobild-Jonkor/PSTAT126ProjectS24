@@ -2,8 +2,8 @@
 title: "126 Data Project, Step 2"
 date: "Sam Ream, Valeria Lopez, Skyler Yee"
 output:
-  word_document: default
   html_document: default
+  word_document: default
   pdf_document:
     latex_engine: xelatex
 ---
@@ -100,12 +100,13 @@ The data was approximately what we had expected, which is shown in our calculate
 # Linear Model Assumptions - Runs and Doubles
 
 ```{r fig.cap= "Scatter and QQplots demonstrating the 4 assumtions of a linear model"}
-par(mfrow = c(1, 2))
+
 plot(batting$DOUBLE, batting$RUNS, ylab = "Runs", xlab = "Doubles", main = "Scatterplot")
 abline(0,2.4, col="red",)
 abline(-150,2.4, col="blue",)
 abline(200,2.4, col="blue",)
-qqplot(batting$DOUBLE, batting$RUNS, xlab = "Doubles", ylab = "Runs", main = "QQ-Plot")
+qqnorm(batting$RUNS, main = "QQ-Plot")
+qqline(batting$RUNS)
 ```
 
 
@@ -117,7 +118,7 @@ It is apparent that the relationship between runs and doubles fits the assumptio
 
 **- Independence:** With the knowledge that one batter hitting the ball well enough to get to second base (a double) does not affect the likelihood of the next batter doing the same, we know that the predictors are independent of one another. Additionally, we performed the Durbin-Watson test below which confirms the independence of our variables.
 
-**- Normality:** On inspection, our QQ plot demonstrates the fact that the data is normally distributed.
+**- Normality:** While our errors do not appear to be normally distributed, our large sample size allows us to leverage the Central Limit Theorem to make meaningful analysis.
 
 ```{r}
 library(lmtest)
@@ -179,7 +180,7 @@ print(paste("t-Score: ", t.score))
 margin.error <- t.score * sample.se
 lower.bound <- sample.mean - margin.error
 upper.bound <- sample.mean + margin.error
-print(paste("lower Bound: ", lower.bound))
+print(paste("Lower Bound: ", lower.bound))
 print(paste("Upper Bound: ", upper.bound))
 ```
 
@@ -211,7 +212,7 @@ print(paste("t-Score: ", t.score))
 margin.error <- t.score * sample.se
 lower.bound <- sample.mean - margin.error
 upper.bound <- sample.mean + margin.error
-print(paste("lower Bound: ", lower.bound))
+print(paste("Lower Bound: ", lower.bound))
 print(paste("Upper Bound: ", upper.bound))
 ```
 ```{r include = FALSE}
@@ -231,14 +232,14 @@ The $R^2$ value of our model is 0.9551 and the adjusted $R^2$ is 0.9550. This me
 summary(lm(batting$DOUBLE ~ batting$RUNS))
 ```
 
+\newpage
 
-```{r fig.cap= "Residual Plot"}
+```{r fig.cap= "Residual Plot of the fitted model"}
 model <- lm(batting$RUNS ~ batting$DOUBLE)
 
 res <- resid(model)
 
-plot(fitted(model), res, ylab = "Residuals", xlab = "Fitted Model", main = "Residual Plot")
-abline(0,0)
+plot(fitted(model), res, ylab = "Residuals", xlab = "Fitted Model")
 ```
 
 # Conclusion
