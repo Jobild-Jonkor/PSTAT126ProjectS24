@@ -1,0 +1,92 @@
+---
+title: "126 Data Project, Step 2"
+date: "Sam Ream, Valeria Lopez, Skyler Yee"
+output:
+  pdf_document:
+    latex_engine: xelatex
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+# knit options
+knitr::opts_chunk$set(echo = F,
+                      results = 'markup',
+                      fig.width = 4,
+                      fig.height = 3,
+                      fig.align = 'center',
+                      message = F,
+                      warning = F)
+
+# packages
+library(tidyverse)
+library(faraway)
+library(RSQLite)
+library(skimr)
+```
+```{r, echo=FALSE}
+ball <- dbConnect(drv=RSQLite::SQLite(), dbname="./data/database.sqlite")
+```
+```{r, echo =FALSE}
+batting <- dbGetQuery(ball, "
+                            SELECT
+                            sum(ab) AS AT_BAT,
+                            player_id,
+                            sum(r) AS RUNS,
+                            sum(hr) AS HOME_RUNS, 
+                            sum(triple) AS TRIPLE,
+                            sum(double) AS DOUBLE,
+                            (sum(h) -  sum(hr) - sum(triple) - sum(double)) AS SINGLES,
+                            sum(bb) AS WALKS,
+                            sum(ibb) AS INT_WALKS,
+                            sum(sb) AS STOLEN_BASES,
+                            sum(hbp) AS HIT_BY_PITCH
+                            
+                            FROM
+                            batting
+                            where
+                            year > 2000
+                            group by
+                            player_id
+                            
+                   ")
+sumbat <- batting
+batting <- subset(batting,batting[,1]>100)
+
+
+for (x in 3:11) 
+{
+  batting[,x] <- batting[,x] / 1
+}
+
+set.seed(5)
+batting <- sample_n(batting, 500, replace = FALSE)
+
+players <- dbGetQuery(ball, "
+                      
+                      SELECT 
+                      player_id,
+                      (weight / POWER(height, 2)) *703 AS BMI,
+                      bats as HAND
+                      FROM
+                      player
+                      
+                      ")
+
+
+
+
+players <- subset(players, players[,2]>0)
+
+
+
+for ( x in 1:17918)
+{
+  if(players[x,2] <= 18.5) {players[x,2] <- "U"} 
+  else if(players[x,2] <= 24.9) {players[x,2] <- "H"}
+  else if(players[x,2] <= 29.9) {players[x,2] <- "O"}
+  else {players[x,2] <- "B"}
+}
+
+batting <-  merge(batting, players, by="player_id" )
+```
