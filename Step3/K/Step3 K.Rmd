@@ -93,10 +93,36 @@ batting <-  merge(batting, players, by="player_id" )
 ```
 
 
-
+# PAIRS GRAPH
 
 ```{r, fig.width=10, fig.height=10}
 ggpairs(batting, columns = 2:13)
 ```
+
+
+# MODEL PAIRS
+
+```{r, fig.width=10, fig.height=10}
+ggpairs(batting, columns = c("INT_WALKS","AT_BAT", "WALKS","STOLEN_BASES", "HIT_BY_PITCH"))
+```
+
+
+```{r, fig.width=10, fig.height=10}
+ggpairs(batting, columns = c("INT_WALKS","SINGLES", "TRIPLE","STOLEN_BASES", "HOME_RUNS"))
+```
+
+# MODELS 1 AND 2
+
+
+```{r}
+model_1 <- lm(RUNS~INT_WALKS + SINGLES + TRIPLE + STOLEN_BASES + HOME_RUNS, data = batting)
+model_2 <- lm(RUNS~SINGLES + TRIPLE + HOME_RUNS, data = batting)
+anova(model_1, model_2)
+```
+
+
+
+Reject H0, full model is better.
+
 
 
