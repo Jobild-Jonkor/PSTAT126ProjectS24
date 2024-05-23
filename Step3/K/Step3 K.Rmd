@@ -26,7 +26,7 @@ library(skimr)
 library(GGally)
 ```
 ```{r, echo=FALSE}
-ball <- dbConnect(drv=RSQLite::SQLite(), dbname="../data/database.sqlite")
+ball <- dbConnect(drv=RSQLite::SQLite(), dbname="../../data/database.sqlite")
 ```
 ```{r, echo =FALSE}
 batting <- dbGetQuery(ball, "
