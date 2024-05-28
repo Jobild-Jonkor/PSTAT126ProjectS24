@@ -1,0 +1,178 @@
+---
+title: "126 Data Project, Step 2"
+date: "Sam Ream, Valeria Lopez, Skyler Yee"
+output:
+  pdf_document:
+    latex_engine: xelatex
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+# knit options
+knitr::opts_chunk$set(echo = F,
+                      results = 'markup',
+                      fig.width = 4,
+                      fig.height = 3,
+                      fig.align = 'center',
+                      message = F,
+                      warning = F)
+
+# packages
+library(tidyverse)
+library(faraway)
+library(RSQLite)
+library(skimr)
+library(GGally)
+```
+```{r, echo=FALSE}
+ball <- dbConnect(drv=RSQLite::SQLite(), dbname="../../data/database.sqlite")
+```
+```{r, echo =FALSE}
+batting <- dbGetQuery(ball, "
+                            SELECT
+                            sum(ab) AS AT_BAT,
+                            player_id,
+                            sum(r) AS RUNS,
+                            sum(hr) AS HOME_RUNS, 
+                            sum(triple) AS TRIPLE,
+                            sum(double) AS DOUBLE,
+                            (sum(h) -  sum(hr) - sum(triple) - sum(double)) AS SINGLES,
+                            sum(bb) AS WALKS,
+                            sum(ibb) AS INT_WALKS,
+                            sum(sb) AS STOLEN_BASES,
+                            sum(hbp) AS HIT_BY_PITCH
+                            
+                            FROM
+                            batting
+                            where
+                            year > 2000
+                            group by
+                            player_id
+                            
+                   ")
+sumbat <- batting
+batting <- subset(batting,batting[,1]>100)
+
+
+for (x in 3:11) 
+{
+  batting[,x] <- batting[,x] / 1
+}
+
+set.seed(5)
+batting <- sample_n(batting, 500, replace = FALSE)
+
+players <- dbGetQuery(ball, "
+                      
+                      SELECT 
+                      player_id,
+                      (weight / POWER(height, 2)) *703 AS BMI,
+                      bats as HAND
+                      FROM
+                      player
+                      
+                      ")
+
+
+
+
+players <- subset(players, players[,2]>0)
+
+
+
+for ( x in 1:17918)
+{
+  if(players[x,2] <= 18.5) {players[x,2] <- "U"} 
+  else if(players[x,2] <= 24.9) {players[x,2] <- "H"}
+  else if(players[x,2] <= 29.9) {players[x,2] <- "O"}
+  else {players[x,2] <- "B"}
+}
+
+batting <-  merge(batting, players, by="player_id" )
+```
+
+```{r, eval = FALSE, fig.width=10, fig.height=10}
+ggpairs(batting, columns = 3:13)
+```
+
+```{r, eval= FALSE, fig.width=10, fig.height=10}
+ggpairs(batting, columns = c("INT_WALKS","AT_BAT", "WALKS","STOLEN_BASES", "HIT_BY_PITCH"))
+```
+
+```{r, eval= FALSE, fig.width=10, fig.height=10}
+ggpairs(batting, columns = c("INT_WALKS","SINGLES", "TRIPLE","STOLEN_BASES", "HOME_RUNS"))
+```
+
+
+
+
+
+
+# Introduction
+
+# Analysis of Variables 
+
+When investigating the predictors, we noted it did not appear that we needed to use any transformation to make the data more linear. Additionaly, it is clear that some predictors were highly correlated. An example of this is Singles and Doubles which have a correlation of 0.95. As a consequence of this, we elected to use only one of these two variables in our hand-made model and did the same with other predictors with similar levels of correlation.
+
+We decided to not include interaction variables because different values of our categorical variables (BMI and handedness) do not drastically affect the response. We also felt it was not necessary for any of our non-categorical variables as there are no interactions that we believe to be interesting.
+
+# Computational Models
+
+For our computational models, we used the predictors: Total Intentional walks, Singles, Triples, Stolen Bases, and Home_Runs obtained in a career. We selected these predictors because of their low correlation in addition to their interesting relation to obtained Runs. To help prevent over-correlation, we also elected to create a reduced model using only predictors related to hitting the ball and compared the two to see if we could use a smaller model.
+
+### Model 1 - Full Model
+
+$$\text{E}[Y]=\text{Intercept } + \text{Intentional Walks }+\text{Singles }+\text{Triples }+\text{Stolen Bases }+\text{Home Runs}+\epsilon$$
+
+### Model 2 - Reduced Model
+
+$$\text{E}[Y]=\text{Intercept } + \text{Singles }+\text{Triples }+\text{Home Runs}+\epsilon$$
+
+### Comparison:
+
+$H_0: \text{The Reduced Model is sufficient}$
+
+$H_\alpha: \text{The full Model is not sufficient}$
+
+
+```{r}
+model_1 <- lm(RUNS~INT_WALKS + SINGLES + TRIPLE + STOLEN_BASES + HOME_RUNS, data = batting)
+model_2 <- lm(RUNS~SINGLES + TRIPLE + HOME_RUNS, data = batting)
+anova(model_1, model_2)
+```
+
+### Conclusion
+
+As we rejected $H_0$ in favor for $H_\alpha$, we can determine that the reduced model does not model the data well enough to justify the reduction in predictors. As such, we decided to use model 1, the full model, as our computational model.
+
+
+
+
+
+
+# Statistical Models
+
+# Model Selection and Analysis
+
+Between the computational and Statistical models, we selected the [TEMP] because [TEMP]. For this model:
+
+- Interpret $\beta_i$s and intercept. Are they significant?
+
+- Report R^2 and adj R^2/interpret/discuss
+
+- Complete analysis of residuals and influence points. Use plots Condisder refiting the data with points that have large leverage and residuals
+
+- interpret the model in a way that makes sense. Why do you think some variables dropped out?
+
+- Give CIs for a mean predicted value and the PIs of a future predicted value for at lease one combination of X's
+
+- Summarize
+
+# Conclusion
+
+MODEL 1 and 2 stuff and analysis.
+
+
+
+
