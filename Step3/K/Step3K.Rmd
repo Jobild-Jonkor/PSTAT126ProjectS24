@@ -24,6 +24,8 @@ library(faraway)
 library(RSQLite)
 library(skimr)
 library(GGally)
+library(tidymodels)
+library(leaps)
 ```
 ```{r, echo=FALSE}
 ball <- dbConnect(drv=RSQLite::SQLite(), dbname="../../data/database.sqlite")
@@ -111,6 +113,8 @@ ggpairs(batting, columns = c("INT_WALKS","SINGLES", "TRIPLE","STOLEN_BASES", "HO
 
 # Introduction
 
+
+
 # Analysis of Variables 
 
 When investigating the predictors, we noted it did not appear that we needed to use any transformation to make the data more linear. Additionaly, it is clear that some predictors were highly correlated. An example of this is Singles and Doubles which have a correlation of 0.95. As a consequence of this, we elected to use only one of these two variables in our hand-made model and did the same with other predictors with similar levels of correlation.
@@ -150,18 +154,44 @@ As we rejected $H_0$ in favor for $H_\alpha$, we can determine that the reduced 
 
 
 
-
 # Statistical Models
 
-# Model Selection and Analysis
+We used a stepwise search to create the best model for our data. For a size of 4 predictors the variables home runs, singles, walks, and stolen bases create a well fit model.
 
-Between the computational and Statistical models, we selected the [TEMP] because [TEMP]. For this model:
+```{r eval = FALSE}
+stat_model <- regsubsets(RUNS~HOME_RUNS + TRIPLE + DOUBLE + SINGLES + WALKS + INT_WALKS + STOLEN_BASES + HIT_BY_PITCH, data = batting,
+                  method = 'seqrep',
+                  nbest = 1,
+                  nvmax = 4)
+summary(stat_model)
+```
+
+
+
+### Residual Plot and Summary table
+
+```{r}
+stat_model <- lm(RUNS~HOME_RUNS + SINGLES + WALKS + STOLEN_BASES, data = batting)
+res <- resid(stat_model)
+plot(fitted(stat_model), res, ylab = 'Residuals', xlab = 'Fitted Model')
+abline(0,0)
+```
+```{r}
+summary(lm(RUNS~HOME_RUNS + SINGLES + WALKS + STOLEN_BASES, data = batting))
+```
+
+# Final model selection
+Between the two models we created, the statistical model and computational model, we selected the Statistical model. The reason behind this selection is that the statistical model has a larger $R_{adj}^2$ value and we want to explain as much of the variance as possible in our model.
+
+
+# Analysis of the Final Model:
+
 
 - Interpret $\beta_i$s and intercept. Are they significant? (SAM)
 
 - Report R^2 and adj R^2/interpret/discuss (SAM)
 
-- Complete analysis of residuals and influence points. Use plots Condisder refiting the data with points that have large leverage and residuals (KOSYS)
+- Complete analysis of residuals and influence points. Use plots/consider refitting the data with points that have large leverage and residuals (KOSYS)
 
 - interpret the model in a way that makes sense. Why do you think some variables dropped out? (KOSYS)
 
@@ -170,9 +200,6 @@ Between the computational and Statistical models, we selected the [TEMP] because
 # Summary
 
 - Summarize (VALERIA)
-
-
-MODEL 1 and 2 stuff and analysis.
 
 
 
