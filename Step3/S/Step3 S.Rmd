@@ -24,9 +24,11 @@ library(faraway)
 library(RSQLite)
 library(skimr)
 ```
+
 ```{r, echo=FALSE}
 ball <- dbConnect(drv=RSQLite::SQLite(), dbname="../../data/database.sqlite")
 ```
+
 ```{r, echo =FALSE}
 batting <- dbGetQuery(ball, "
                             SELECT
@@ -91,92 +93,22 @@ for ( x in 1:17918)
 batting <-  merge(batting, players, by="player_id" )
 ```
 
-
-
 # Sam
 
+```{r}
+summary(lm(RUNS~HOME_RUNS + SINGLES + WALKS + STOLEN_BASES, data = batting))
+```
 
+**Coefficient Interpretations**
 
+$\beta_1$: Every additional home run a player hits is associated with an increase of about 0.977261 mean runs, after accounting for singles, walks and stolen bases.
 
+$\beta_2$: Every additional single a player hits is associated with an increase of about 0.400909 mean runs, after accounting for home runs, walks and stolen bases.
 
+$\beta_3$: Every additional walk a player earns is associated with an increase of about 0.268561 mean runs, after accounting for home runs, singles and stolen bases.
 
+$\beta_4$: Every additional stolen base a player earns is associated with an increase of about 0.268561 mean runs, after accounting for home runs, singles and walks.
 
+**Significance Tests**
 
-
-
-
-
-
-
-
-
-
-
-# Valeria
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Skyler
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Looking at the p-values for each of our coefficients, we can see that all of our coefficients are significant at the 0.05 level.
