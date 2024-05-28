@@ -23,15 +23,10 @@ library(tidyverse)
 library(faraway)
 library(RSQLite)
 library(skimr)
-library(GGally)
-library(tidymodels)
-library(leaps)
 ```
-
 ```{r, echo=FALSE}
-ball <- dbConnect(drv=RSQLite::SQLite(), dbname="../../data/database.sqlite")
+ball <- dbConnect(drv=RSQLite::SQLite(), dbname="../data/database.sqlite")
 ```
-
 ```{r, echo =FALSE}
 batting <- dbGetQuery(ball, "
                             SELECT
@@ -96,39 +91,92 @@ for ( x in 1:17918)
 batting <-  merge(batting, players, by="player_id" )
 ```
 
+
+
 # Sam
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # Valeria
 
-```{r}
-lm(RUNS~INT_WALKS + SINGLES + TRIPLE + STOLEN_BASES + HOME_RUNS, data = batting) %>% tidy()
-```
-
-```{r}
-lm(RUNS~SINGLES + TRIPLE + HOME_RUNS, data = batting) %>% tidy()
-```
-
-```{r}
-stat_model <- regsubsets(RUNS~HOME_RUNS + TRIPLE + DOUBLE + SINGLES + WALKS + INT_WALKS + STOLEN_BASES + HIT_BY_PITCH, data = batting,
-                  method = 'seqrep',
-                  nbest = 1,
-                  nvmax = 4)
-summary(stat_model)
-```
-
-We used a stepwise search to create the best model for our data. For a size of 4 predictors the variables home runs, singles, walks, and stolen bases create a well fit model.
 
 
-## Stat model residual plot
 
-```{r}
-stat_model <- lm(RUNS~HOME_RUNS + SINGLES + WALKS + STOLEN_BASES, data = batting)
-res <- resid(stat_model)
-plot(fitted(stat_model), res, ylab = 'Residuals', xlab = 'Fitted Model')
-abline(0,0)
-```
-```{r}
-summary(lm(RUNS~HOME_RUNS + SINGLES + WALKS + STOLEN_BASES, data = batting))
-```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # Skyler
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
