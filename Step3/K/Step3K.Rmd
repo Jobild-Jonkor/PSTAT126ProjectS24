@@ -157,19 +157,20 @@ As we rejected $H_0$ in favor for $H_\alpha$, we can determine that the reduced 
 
 Between the computational and Statistical models, we selected the [TEMP] because [TEMP]. For this model:
 
-- Interpret $\beta_i$s and intercept. Are they significant?
+- Interpret $\beta_i$s and intercept. Are they significant? (SAM)
 
-- Report R^2 and adj R^2/interpret/discuss
+- Report R^2 and adj R^2/interpret/discuss (SAM)
 
-- Complete analysis of residuals and influence points. Use plots Condisder refiting the data with points that have large leverage and residuals
+- Complete analysis of residuals and influence points. Use plots Condisder refiting the data with points that have large leverage and residuals (KOSYS)
 
-- interpret the model in a way that makes sense. Why do you think some variables dropped out?
+- interpret the model in a way that makes sense. Why do you think some variables dropped out? (KOSYS)
 
-- Give CIs for a mean predicted value and the PIs of a future predicted value for at lease one combination of X's
+- Give CIs for a mean predicted value and the PIs of a future predicted value for at lease one combination of X's (VALERIA)
 
-- Summarize
+# Summary
 
-# Conclusion
+- Summarize (VALERIA)
+
 
 MODEL 1 and 2 stuff and analysis.
 
