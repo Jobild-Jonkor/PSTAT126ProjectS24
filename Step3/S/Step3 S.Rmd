@@ -99,7 +99,11 @@ batting <-  merge(batting, players, by="player_id" )
 summary(lm(RUNS~HOME_RUNS + SINGLES + WALKS + STOLEN_BASES, data = batting))
 ```
 
-**Coefficient Interpretations**
+# Introduction
+
+For our project, we are looking at the "History of Baseball" data set, which is a record of all the stats of baseball players who have played in the MLB up until the year 2015. We are interested in seeing which of our predictors (singles, doubles, triples, home runs, walks, intentional walks, hit by pitches, stolen bases, player BMIs, and batting hand) contribute the most to runs scored by individual players. So far, we have seen that our sample aligns with overall MLB stats (eg. the batting average for our sample is 0.246 compared to the MLB’s 0.250) and all of our model assumptions hold, which allowed us to construct a simple linear model with doubles as our predictor. Now, we will be selecting predictors to construct potential multiple linear models and selecting the best one.
+
+# Coefficient Interpretations
 
 $\beta_1$: Every additional home run a player hits is associated with an increase of about 0.977261 mean runs, after accounting for singles, walks and stolen bases.
 
