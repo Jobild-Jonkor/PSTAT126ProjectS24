@@ -191,6 +191,44 @@ Between the two models we created, the statistical model and computational model
 
 - Report R^2 and adj R^2/interpret/discuss (SAM)
 
+
+
+
+
+
+```{r, fig.width=10, fig.height=4}
+par(mfrow = c(1, 2))
+plot(augment(stat_model)$.hat)
+plot(augment(stat_model)$.ext.std.resid)
+plot(augment(stat_model)$.cooksd)
+
+p <- which.max(augment(stat_model)$.cooksd)
+p
+
+
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 - Complete analysis of residuals and influence points. Use plots/consider refitting the data with points that have large leverage and residuals (KOSYS)
 
 - interpret the model in a way that makes sense. Why do you think some variables dropped out? (KOSYS)
