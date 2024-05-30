@@ -197,17 +197,35 @@ Between the two models we created, the statistical model and computational model
 
 
 ```{r, fig.width=10, fig.height=4}
+
+studentize <- function(resid)
+  {
+    resid*sqrt((500 - 5 - 1)/(500 - 5 - resid^2))
+  }
+
 par(mfrow = c(1, 2))
 plot(augment(stat_model)$.hat)
-plot(augment(stat_model)$.ext.std.resid)
+
+
+
+
+
+
+
+
+exStdResid <- augment(stat_model)$.std.resid
+exStdResid <- as.data.frame(exStdResid)
+
+exStdResid[,2] <- exStdResid[,1]
+exStdResid[,1] <- 1:500
+colnames(exStdResid) <- (c("Index", "External Studentized Residuals"))
+exStdResid[,2] <- studentize(exStdResid[,2])
+
+
+plot(exStdResid)
+abline(3,0)
+abline(-3,0)
 plot(augment(stat_model)$.cooksd)
-
-p <- which.max(augment(stat_model)$.cooksd)
-p
-
-
-
-
 
 ```
 
