@@ -1,5 +1,5 @@
 ---
-title: "126 Data Project, Step 2"
+title: "126 Data Project, Step 3"
 date: "Sam Ream, Valeria Lopez, Skyler Yee"
 output:
   pdf_document:
