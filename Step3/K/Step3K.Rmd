@@ -170,7 +170,7 @@ summary(stat_model)
 
 ### Residual Plot and Summary table
 
-```{r}
+```{r, fig.cap="Plot visualizing how far the residuals stray from the fitted model"}
 stat_model <- lm(RUNS~HOME_RUNS + SINGLES + WALKS + STOLEN_BASES, data = batting)
 res <- resid(stat_model)
 plot(fitted(stat_model), res, ylab = 'Residuals', xlab = 'Fitted Model')
@@ -239,7 +239,7 @@ Looking at the plots of leverage, externally studentized residuals, and Cook's D
 
 ## Interpretation of Model
 
-The big Skrunkly
+Our model shows that there is a positive relationship between our chosen predictors and the number of runs that a players gets in their career. Of the parameters, Home runs have the largest impact and walks has the least. One can conclude that more difficult goals like home runs, stolen bases, and singles will contribute to a greater number of runs than something that is more easily obtained--such as a walk.
 
 
 
@@ -252,7 +252,7 @@ batting999 <- batting[-438,]
 stat_model2 <- lm(RUNS~HOME_RUNS + SINGLES + WALKS + STOLEN_BASES, data = batting999)
 
 
-plot(10,10)
+plot(5,5)
 abline(stat_model, col="Red")
 abline(stat_model2, col="Red")
 
