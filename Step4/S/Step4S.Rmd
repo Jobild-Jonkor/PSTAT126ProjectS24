@@ -98,9 +98,6 @@ batting <-  merge(batting, players, by="player_id" )
 
 ```{r eval = FALSE}
 #Final Model
-stat_model <- regsubsets(RUNS~HOME_RUNS + TRIPLE + DOUBLE + SINGLES + WALKS + INT_WALKS + STOLEN_BASES + HIT_BY_PITCH, data = batting,
-                  method = 'seqrep',
-                  nbest = 1,
-                  nvmax = 4)
+stat_model <- lm(RUNS~HOME_RUNS + SINGLES + WALKS + STOLEN_BASES, data = batting)
 summary(stat_model)
 ```
