@@ -26,6 +26,7 @@ library(skimr)
 library(GGally)
 library(tidymodels)
 library(leaps)
+library(glmnet)
 ```
 ```{r, echo=FALSE}
 ball <- dbConnect(drv=RSQLite::SQLite(), dbname="../../data/database.sqlite")
@@ -101,3 +102,106 @@ batting <-  merge(batting, players, by="player_id" )
 stat_model <- lm(RUNS~HOME_RUNS + SINGLES + WALKS + STOLEN_BASES, data = batting)
 summary(stat_model)
 ```
+
+# Ridge Regression
+```{r}
+y <- batting$RUNS
+x <- data.matrix(batting[, c('AT_BAT', 'HOME_RUNS', 'SINGLES', 'WALKS', 'STOLEN_BASES', 'WALKS', 'INT_WALKS', 'STOLEN_BASES', 'HIT_BY_PITCH')])
+```
+
+## Fit the Ridge Regression Model 
+```{r}
+ridge_model <- glmnet(x, y, alpha = 0)
+summary(ridge_model)
+```
+## Choose an Optimal Value for Lambda 
+```{r}
+cv_model_ridge <- cv.glmnet(x, y, alpha = 0)
+
+# find optimal lambda value that minimizes test MSE
+best_lambda_r <- cv_model_ridge$lambda.min
+best_lambda_r
+
+# produce plot of test MSE by lambda value
+plot(cv_model_ridge)
+```
+The lambda value that minimizes the test MSE is 24.53741.  
+
+## Analyze Final Model
+```{r}
+#find coefficients of best model
+best_model <- glmnet(x, y, alpha=0, lamba = best_lamba_r)
+
+#coef(best_model_ridge)
+```
+
+
+```{r}
+# produce ridge trace plot
+plot(ridge_model, xvar = 'lambda')
+```
+```{r}
+#calculate R-squared
+y_predicted <- predict(ridge_model, s = best_lambda_r, newx =x)
+
+#SST and SSE
+sst <- sum((y-mean(y))^2)
+sse <- sum((y_predicted - y)^2)
+
+rsq <- 1-(sse/sst)
+rsq
+```
+The R-Squared is 0.9914, so the best model explains 99.14% of the variation in the response values. 
+
+# LASSO
+```{r}
+y <- batting$RUNS
+x <- data.matrix(batting[, c('AT_BAT', 'HOME_RUNS', 'SINGLES', 'WALKS', 'STOLEN_BASES', 'WALKS', 'INT_WALKS', 'STOLEN_BASES', 'HIT_BY_PITCH')])
+```
+
+## Fit the Lasso Regression Model 
+```{r}
+model <- glmnet(x, y, alpha = 1)
+summary(model)
+```
+
+## Choose an Optimal Value for Lambda 
+```{r}
+cv_model <- cv.glmnet(x, y, alpha = 1)
+
+# find optimal lambda value that minimizes test MSE
+best_lambda <- cv_model$lambda.min
+best_lambda
+
+# produce plot of test MSE by lambda value
+plot(cv_model)
+```
+The lambda value that minimizes the test MSE is 0.364. 
+
+## Analyze Final Model
+```{r}
+#find coefficients of best model
+best_model <- glmnet(x, y, alpha=1, lamba = best_lamba)
+
+#coef(best_model)
+```
+
+
+```{r}
+# produce ridge trace plot
+plot(model, xvar = 'lambda')
+```
+
+
+```{r}
+#calculate R-squared
+y_predicted <- predict(model, s = best_lambda, newx =x)
+
+#SST and SSE
+sst <- sum((y-mean(y))^2)
+sse <- sum((y_predicted - y)^2)
+
+rsq <- 1-(sse/sst)
+rsq
+```
+The R-Squared is 0.9936, so the best model explains 99.36% of the variation in the response values. 
