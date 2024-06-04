@@ -101,3 +101,24 @@ batting <-  merge(batting, players, by="player_id" )
 stat_model <- lm(RUNS~HOME_RUNS + SINGLES + WALKS + STOLEN_BASES, data = batting)
 summary(stat_model)
 ```
+
+# Shrinkage Methods
+
+• Introduction (Quickly reacquaint the reader with the relevant variables). Ensure to
+include a citation for the original data source, and clarify the population to which your
+results are being inferred.
+
+• Execute both ridge regression (RR) and LASSO on the complete variable set (use cross-
+validation to find lambda). Analyze and differentiate the models (i.e., coeﬀicients) with
+the final MLR model from the previous project task.
+
+• Construct a single graph with the observed response variable on the x-axis and the
+predicted response variable on the y-axis. Superimpose (using color with a legend) 3
+different predictions: MLR, RR, LASSO. Provide a commentary on the figure.
+
+• Conclusion (Sum up your results. Discuss any notable happenings. Were the data largely
+as you anticipated or were there surprising results? What further queries would you like
+to explore about the data?)
+
+
+
