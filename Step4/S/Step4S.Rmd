@@ -26,6 +26,7 @@ library(skimr)
 library(GGally)
 library(tidymodels)
 library(leaps)
+library(glmnet)
 ```
 ```{r, echo=FALSE}
 ball <- dbConnect(drv=RSQLite::SQLite(), dbname="../../data/database.sqlite")
@@ -101,3 +102,49 @@ batting <-  merge(batting, players, by="player_id" )
 stat_model <- lm(RUNS~HOME_RUNS + SINGLES + WALKS + STOLEN_BASES, data = batting)
 summary(stat_model)
 ```
+
+
+```{r}
+fmod <- lm(RUNS ~ HOME_RUNS + TRIPLE + DOUBLE + SINGLES + WALKS + INT_WALKS + STOLEN_BASES + HIT_BY_PITCH, data=batting)
+summary(fmod)
+```
+**Innovation Step: Principal Components**
+
+```{r}
+install.packages("corrr")
+library('corrr')
+install.packages("ggcorrplot")
+library(ggcorrplot)
+install.packages("FactoMineR")
+library("FactoMineR")
+install.packages("factoextra")
+library("factoextra")
+```
+```{r}
+head(batting)
+numerical_data <- batting[,4:11]
+head(numerical_data)
+data_normalized <- scale(numerical_data)
+head(data_normalized)
+data.pca <- princomp(data_normalized)
+summary(data.pca)
+data.pca$loadings[, 1:2]
+```
+```{r}
+# visualization
+fviz_eig(data.pca, addlabels=TRUE)
+fviz_pca_var(data.pca, col.var="black")
+fviz_cos2(data.pca, choice="var", axes=1:2)
+fviz_pca_var(data.pca, col.var = "cos2",
+            gradient.cols = c("black", "orange", "green"),
+            repel = TRUE)
+
+# Doubles contributes the most; home runs, walks, singles, triples, and stolen bases also contribute highly
+# home runs, walks, doubles, singles positively correlated
+# triples, singles, stolen bases negatively correlated
+# all have similar magnitude (distance from origin)
+
+# chose home runs, walks, doubles 
+```
+
+
