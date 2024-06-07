@@ -108,7 +108,16 @@ summary(stat_model)
 fmod <- lm(RUNS ~ HOME_RUNS + TRIPLE + DOUBLE + SINGLES + WALKS + INT_WALKS + STOLEN_BASES + HIT_BY_PITCH, data=batting)
 summary(fmod)
 ```
+intro: 
+
+Using the "History of Baseball" data set, we analyzed how our predictors (singles, doubles, triples, home runs, walks, intentional walks, hit by pitches, stolen bases, BMI, and batting hand) affected the runs scores by individual players. We sampled player statistics randomly from games played between 2000-2015, which allowed us to get an accurate representation of the population of all players who played between 2000 and 2015. Using both Ridge Regression and LASSO, we shrunk the size of some predictors to obtain estimates with smaller variance for higher precision.
+
+#Conclusion 
+The data was what we had anticipated because the models had high R squared values, which indicates a large quantity of the variability can be explained by the regression. Using Ridge Regression, which aims to minimize SSE, we saw an R-squared value of 0.9914. Using LASSO regression, which shrinks the less important coefficients to zero, we got an R-squared value of 0.9936.
+
 **Innovation Step: Principal Components**
+
+We chose Principal Components Analysis for our innovation because 
 
 ```{r}
 install.packages("corrr")
