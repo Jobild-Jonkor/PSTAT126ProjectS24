@@ -99,7 +99,7 @@ batting <-  merge(batting, players, by="player_id" )
 
 # Introduction
 
-Using the "History of Baseball" data set we analyzed how our predictors (singles, doubles, triples, home runs, walk, intentional walks, hit by pitches, stolen bases, BMI, and batting hand) affected the runs scores by individual players. Our population was was sampled randomly from the years 2000-2015, which allowed us to get an accurate representation of the population and represent the changing strategies of baseball. Using both ridge regression and LASSO we shrink the size of some predictors to obtain estimates with smaller variance for higher precision. 
+Using the "History of Baseball" data set, we analyzed how our predictors (singles, doubles, triples, home runs, walks, intentional walks, hit by pitches, stolen bases, BMI, and batting hand) affected the runs scores by individual players. We sampled player statistics randomly from games played between 2000-2015, which allowed us to get an accurate representation of the population of all players who played between 2000 and 2015. Using both Ridge Regression and LASSO, we shrunk the size of some predictors to obtain estimates with smaller variance for higher precision. 
 
 ```{r eval = FALSE}
 #Final Model
@@ -222,4 +222,4 @@ rsq
 The R-Squared is 0.9936, so the best model explains 99.36% of the variation in the response values.
 
 #Conclusion 
-The data was what we had anticipated because they had high R squared values, so a lot of the variability could by explained by the regression. Using Ridge regression, which aims to minimize SSE, the R-squared was 0.9914. Using LASSO regression, which shrinks the less important coefficients to zero, the R-squared was 0.9936.
+The data was what we had anticipated because the models had high R squared values, which indicates a large quantity of the variability can be explained by the regression. Using Ridge Regression, which aims to minimize SSE, we saw an R-squared value of 0.9914. Using LASSO regression, which shrinks the less important coefficients to zero, we got an R-squared value of 0.9936.
