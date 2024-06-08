@@ -117,7 +117,7 @@ The data was what we had anticipated because the models had high R squared value
 
 **Innovation Step: Principal Components**
 
-We chose Principal Components Analysis for our innovation because 
+We chose Principal Components Analysis for our innovation because this method is used when there are a large number of predictors. This method 
 
 ```{r}
 install.packages("corrr")
