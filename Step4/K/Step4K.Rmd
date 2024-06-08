@@ -107,7 +107,7 @@ summary(stat_model)
 # Ridge Regression
 ```{r}
 y <- batting$RUNS
-x <- data.matrix(batting[, c('AT_BAT', 'HOME_RUNS', 'SINGLES', 'WALKS', 'STOLEN_BASES', 'WALKS', 'INT_WALKS', 'STOLEN_BASES', 'HIT_BY_PITCH')])
+x <- data.matrix(batting[, c('AT_BAT', 'HOME_RUNS', 'SINGLES', 'WALKS', 'STOLEN_BASES', 'INT_WALKS', 'STOLEN_BASES', 'HIT_BY_PITCH')])
 ```
 
 ## Fit the Ridge Regression Model 
@@ -166,7 +166,7 @@ The R-Squared is 0.9914, so the best model explains 99.14% of the variation in t
 # LASSO
 ```{r}
 y <- batting$RUNS
-x <- data.matrix(batting[, c('AT_BAT', 'HOME_RUNS', 'SINGLES', 'WALKS', 'STOLEN_BASES', 'WALKS', 'INT_WALKS', 'STOLEN_BASES', 'HIT_BY_PITCH')])
+x <- data.matrix(batting[, c('AT_BAT', 'HOME_RUNS', 'SINGLES', 'WALKS', 'STOLEN_BASES', 'INT_WALKS', 'STOLEN_BASES', 'HIT_BY_PITCH')])
 ```
 
 ## Fit the Lasso Regression Model 
@@ -272,7 +272,73 @@ cv_model$lambda.min
 
 
 
+```{r, echo =FALSE}
+batting <- dbGetQuery(ball, "
+                            SELECT
+                            sum(ab) AS AT_BAT,
+                            player_id,
+                            sum(r) AS RUNS,
+                            sum(hr) AS HOME_RUNS, 
+                            sum(triple) AS TRIPLE,
+                            sum(double) AS DOUBLE,
+                            (sum(h) -  sum(hr) - sum(triple) - sum(double)) AS SINGLES,
+                            sum(bb) AS WALKS,
+                            sum(ibb) AS INT_WALKS,
+                            sum(sb) AS STOLEN_BASES,
+                            sum(hbp) AS HIT_BY_PITCH
+                            
+                            FROM
+                            batting
+                            where
+                            year > 2000
+                            group by
+                            player_id
+                            
+                   ")
+sumbat <- batting
+batting <- subset(batting,batting[,1]>100)
 
+
+for (x in 3:11) 
+{
+  batting[,x] <- batting[,x] / 1
+}
+
+set.seed(678)
+batting <- sample_n(batting, 500, replace = FALSE)
+
+players <- dbGetQuery(ball, "
+                      
+                      SELECT 
+                      player_id,
+                      (weight / POWER(height, 2)) *703 AS BMI,
+                      bats as HAND
+                      FROM
+                      player
+                      
+                      ")
+
+
+
+
+players <- subset(players, players[,2]>0)
+
+
+
+for ( x in 1:17918)
+{
+  if(players[x,2] <= 18.5) {players[x,2] <- "U"} 
+  else if(players[x,2] <= 24.9) {players[x,2] <- "H"}
+  else if(players[x,2] <= 29.9) {players[x,2] <- "O"}
+  else {players[x,2] <- "B"}
+}
+
+batting <-  merge(batting, players, by="player_id" )
+
+```
+```{r}
+x <- data.matrix(batting[, c('AT_BAT', 'HOME_RUNS', 'SINGLES', 'WALKS', 'STOLEN_BASES', 'INT_WALKS', 'STOLEN_BASES', 'HIT_BY_PITCH')])
+```
 
 
 
