@@ -364,7 +364,7 @@ stat_model_y_predictions[,2] <- batting$RUNS
 ggplot() + 
   
   geom_point(aes(x=Prediction, y=Actual, color="MLR"), stat_model_y_predictions,size = 0.5) + 
- geom_smooth(aes(x=Prediction, y=Actual, color="MLR"), stat_model_y_predictions, method = lm)+
+  geom_smooth(aes(x=Prediction, y=Actual, color="MLR"), stat_model_y_predictions, method = lm)+
   
   geom_point(aes(x=Prediction, y=Actual, color="Ridge Model"), ridge_model_y_predictions, size =0.5)+
   geom_smooth(aes(x=Prediction, y=Actual, color="Ridge Model"), ridge_model_y_predictions, method = lm)+
