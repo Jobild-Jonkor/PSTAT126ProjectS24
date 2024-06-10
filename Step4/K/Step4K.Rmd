@@ -251,7 +251,6 @@ The R-Squared is 0.9936, so the best model explains 99.36% of the variation in t
 
 
 
-
 ```{r}
 
 
