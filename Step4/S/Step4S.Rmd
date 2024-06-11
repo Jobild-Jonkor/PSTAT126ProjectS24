@@ -27,6 +27,11 @@ library(GGally)
 library(tidymodels)
 library(leaps)
 library(glmnet)
+library(corrr)
+library(ggcorrplot)
+library(FactoMineR)
+
+library(factoextra)
 ```
 
 ```{r, echo=FALSE}
@@ -122,22 +127,7 @@ Let $\mathbf{X'} = (X_1, X_2,...X_k)$ and $\mathbf{u'}$ be a $p\times1$ vector o
 
 First we normalize the data by dividing by the sample standard deviation, compute the PCA using the sample correlation matrix, and assess the cumulative proportion of each principal component to see which principal components explain the most of the total variance. Then look at the loading matrix to see how these principal components relate to each column of our data.
 
-```{r}
-# installing necessary packages
 
-install.packages("rlang")
-install.packages("RSQLite")
-install.packages("Rtools")
-
-install.packages("corrr")
-library('corrr')
-install.packages("ggcorrplot")
-library(ggcorrplot)
-install.packages("FactoMineR")
-library("FactoMineR")
-install.packages("factoextra")
-library("factoextra")
-```
 
 ### Calculations
 
@@ -154,6 +144,8 @@ head(data_normalized)
 # PCA computation
 data.pca <- princomp(data_normalized)
 summary(data.pca)
+
+data.pca$comp.1
 
 # Loading matrix
 data.pca$loadings[, 1:2] # come back: using right components?
