@@ -109,16 +109,13 @@ Using the "History of Baseball" data set, we analyzed how our predictors (single
 
 # Ridge Regression
 
-### Summary Table of the Ridge Regression
-
-```{r}
+```{r echo = FALSE}
 ridge_model <- glmnet(x, y, alpha = 0)
-summary(ridge_model)
 ```
 
-### Optimal Lambda
+### Optimal Lambda - Ridge Regression
 
-```{r}
+```{r, fig.cap="The relationship between MSE and Log(lambda)"}
 cv_model_ridge <- cv.glmnet(x, y, alpha = 0)
 
 # find optimal lambda value that minimizes test MSE
@@ -126,21 +123,78 @@ best_lambda_r <- cv_model_ridge$lambda.min
 
 # produce plot of test MSE by lambda value
 plot(cv_model_ridge)
-print("The best lamda was found to be: ") 
+```
+
+We found that the MSE was minimized when $\lambda$ is equal to:
+```{r}
 best_lambda_r
 ```
 
-# Lasso Regression
 
-### Summary Table of the Lasso Regression
+### Model Analysis
 
+#### R-Squared Analysis
 ```{r}
-model <- glmnet(x, y, alpha = 1)
-summary(model)
+#calculate R-squared
+y_predicted <- predict(ridge_model, s = best_lambda_r, newx =x)
+
+#SST and SSE
+sst <- sum((y-mean(y))^2)
+sse <- sum((y_predicted - y)^2)
+
+rsq <- 1-(sse/sst)
+#rsq
 ```
 
-### Optimal Lambda
+When Lambda equals 24.53741, the R-Squared is 0.9914. This implies that the model explains approximately 99.14% of the variation in the response values..
 
+#### MSE Analysis
+
+
+# Lasso Regression
+
+```{r echo = FALSE}
+model <- glmnet(x, y, alpha = 1)
+```
+
+### Optimal Lambda - Lasso Regression
+
+```{r, fig.cap="The relationship between MSE and Log(lambda)"}
+cv_model <- cv.glmnet(x, y, alpha = 1)
+
+# find optimal lambda value that minimizes test MSE
+best_lambda <- cv_model$lambda.min
+best_lambda
+
+# produce plot of test MSE by lambda value
+plot(cv_model)
+```
+
+We found that the MSE was minimized when $\lambda$ is equal to:
+```{r}
+best_lambda
+```
+
+
+
+### Model Analysis
+
+#### R-Squared Analysis
+```{r}
+#calculate R-squared
+y_predicted <- predict(model, s = best_lambda, newx =x)
+
+#SST and SSE
+sst <- sum((y-mean(y))^2)
+sse <- sum((y_predicted - y)^2)
+
+rsq <- 1-(sse/sst)
+#rsq
+```
+
+When Lambda equals 0.3643727, the R-Squared is 0.9935687. This implies that the model explains approximately 99.36% of the variation in the response values.
+
+#### MSE Analysis
 
 
 # Comparison of our Models
