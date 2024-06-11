@@ -150,7 +150,7 @@ We reject $H_0$ at 0.05 level. Thus, the amount of doubles a player hits is a si
 
 # Fit of Model
 
-The $R^2$ value of our model is 0.9551 and the adjusted $R^2$ is 0.9550. This means that the model explains 95.51% of the variance of the recorded events. Additionally, the residual plot in figure 3 shows how the data points share a similar spread which implies that the model is a good fit.
+The $R^2$ value of our model is 0.9551, which means that the model explains 95.51% of the variance of the recorded events. Additionally, the residual plot in figure 3 shows how the data points share a similar spread which implies that the model is a good fit.
 
 ```{r include=FALSE}
 summary(lm(batting$DOUBLE ~ batting$RUNS))
