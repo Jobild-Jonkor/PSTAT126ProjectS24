@@ -1,0 +1,210 @@
+---
+title: "126 Data Project, Step 4"
+date: "Sam Ream, Valeria Lopez, Skyler Yee"
+output:
+  pdf_document:
+    latex_engine: xelatex
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+# knit options
+knitr::opts_chunk$set(echo = F,
+                      results = 'markup',
+                      fig.width = 4,
+                      fig.height = 3,
+                      fig.align = 'center',
+                      message = F,
+                      warning = F)
+
+# packages
+library(tidyverse)
+library(faraway)
+library(RSQLite)
+library(skimr)
+library(GGally)
+library(tidymodels)
+library(leaps)
+library(glmnet)
+library(gridExtra)
+```
+```{r, echo=FALSE}
+ball <- dbConnect(drv=RSQLite::SQLite(), dbname="../../data/database.sqlite")
+```
+```{r, echo =FALSE}
+batting <- dbGetQuery(ball, "
+                            SELECT
+                            sum(ab) AS AT_BAT,
+                            player_id,
+                            sum(r) AS RUNS,
+                            sum(hr) AS HOME_RUNS, 
+                            sum(triple) AS TRIPLE,
+                            sum(double) AS DOUBLE,
+                            (sum(h) -  sum(hr) - sum(triple) - sum(double)) AS SINGLES,
+                            sum(bb) AS WALKS,
+                            sum(ibb) AS INT_WALKS,
+                            sum(sb) AS STOLEN_BASES,
+                            sum(hbp) AS HIT_BY_PITCH
+                            
+                            FROM
+                            batting
+                            where
+                            year > 2000
+                            group by
+                            player_id
+                            
+                   ")
+sumbat <- batting
+batting <- subset(batting,batting[,1]>100)
+
+
+for (x in 3:11) 
+{
+  batting[,x] <- batting[,x] / 1
+}
+
+set.seed(5)
+batting <- sample_n(batting, 500, replace = FALSE)
+
+players <- dbGetQuery(ball, "
+                      
+                      SELECT 
+                      player_id,
+                      (weight / POWER(height, 2)) *703 AS BMI,
+                      bats as HAND
+                      FROM
+                      player
+                      
+                      ")
+
+
+
+
+players <- subset(players, players[,2]>0)
+
+
+
+for ( x in 1:17918)
+{
+  if(players[x,2] <= 18.5) {players[x,2] <- "U"} 
+  else if(players[x,2] <= 24.9) {players[x,2] <- "H"}
+  else if(players[x,2] <= 29.9) {players[x,2] <- "O"}
+  else {players[x,2] <- "B"}
+}
+
+batting <-  merge(batting, players, by="player_id" )
+```
+
+```{r}
+# x and y setup with current dataset
+y <- batting$RUNS
+x <- data.matrix(batting[, c('AT_BAT', 'HOME_RUNS', 'SINGLES', 'WALKS', 'STOLEN_BASES', 'WALKS', 'INT_WALKS', 'STOLEN_BASES', 'HIT_BY_PITCH')])
+```
+
+
+# Introduction
+
+Using the "History of Baseball" data set, we analyzed how our predictors (singles, doubles, triples, home runs, walks, intentional walks, hit by pitches, stolen bases, BMI, and batting hand) affected the runs scores by individual players. We sampled player statistics randomly from games played between 2000-2015, which allowed us to get an accurate representation of the population of all players who played between 2000 and 2015. Using both Ridge Regression and LASSO, we shrunk the size of some predictors to obtain estimates with smaller variance for higher precision. 
+
+# Ridge Regression
+
+```{r echo = FALSE}
+ridge_model <- glmnet(x, y, alpha = 0)
+```
+
+### Optimal Lambda - Ridge Regression
+
+```{r, fig.cap="The relationship between MSE and Log(lambda)"}
+cv_model_ridge <- cv.glmnet(x, y, alpha = 0)
+
+# find optimal lambda value that minimizes test MSE
+best_lambda_r <- cv_model_ridge$lambda.min
+
+# produce plot of test MSE by lambda value
+plot(cv_model_ridge)
+```
+
+We found that the MSE was minimized when $\lambda$ is equal to:
+```{r}
+best_lambda_r
+```
+
+
+### Model Analysis
+
+#### R-Squared Analysis
+```{r}
+#calculate R-squared
+y_predicted <- predict(ridge_model, s = best_lambda_r, newx =x)
+
+#SST and SSE
+sst <- sum((y-mean(y))^2)
+sse <- sum((y_predicted - y)^2)
+
+rsq <- 1-(sse/sst)
+#rsq
+```
+
+When Lambda equals 24.53741, the R-Squared is 0.9914. This implies that the model explains approximately 99.14% of the variation in the response values..
+
+#### MSE Analysis
+
+
+# Lasso Regression
+
+```{r echo = FALSE}
+model <- glmnet(x, y, alpha = 1)
+```
+
+### Optimal Lambda - Lasso Regression
+
+```{r, fig.cap="The relationship between MSE and Log(lambda)"}
+cv_model <- cv.glmnet(x, y, alpha = 1)
+
+# find optimal lambda value that minimizes test MSE
+best_lambda <- cv_model$lambda.min
+best_lambda
+
+# produce plot of test MSE by lambda value
+plot(cv_model)
+```
+
+We found that the MSE was minimized when $\lambda$ is equal to:
+```{r}
+best_lambda
+```
+
+
+
+### Model Analysis
+
+#### R-Squared Analysis
+```{r}
+#calculate R-squared
+y_predicted <- predict(model, s = best_lambda, newx =x)
+
+#SST and SSE
+sst <- sum((y-mean(y))^2)
+sse <- sum((y_predicted - y)^2)
+
+rsq <- 1-(sse/sst)
+#rsq
+```
+
+When Lambda equals 0.3643727, the R-Squared is 0.9935687. This implies that the model explains approximately 99.36% of the variation in the response values.
+
+#### MSE Analysis
+
+
+# Comparison of our Models
+
+
+
+# Investigation - Principle Component Analysis
+
+
+
+# Conclusion
+
+
