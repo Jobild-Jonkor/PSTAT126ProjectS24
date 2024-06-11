@@ -24,6 +24,7 @@ library(faraway)
 library(RSQLite)
 library(skimr)
 ```
+
 ```{r, echo=FALSE}
 ball <- dbConnect(drv=RSQLite::SQLite(), dbname="./data/database.sqlite")
 ```
@@ -95,7 +96,7 @@ batting <-  merge(batting, players, by="player_id" )
 
 # Introduction
 
-The data was approximately what we had expected, which is shown in our calculated batting average (the number of a player's hits divided by their total number of at-bats) being around 0.246 which is close to MLB’s 0.250 calculated value for the league. We sampled our data randomly to get an accurate representation of the population. We originally had hits as an independent variable but realized that we would be double counting and would make our estimators partially unidentifiable, so we removed it from our data.
+The data was approximately what we had expected, which is shown in our calculated batting average (the number of a player's hits divided by their total number of at-bats) being around 0.246 which is close to MLB's 0.250 calculated value for the league. We sampled our data randomly to get an accurate representation of the population. We originally had hits as an independent variable but realized that we would be double counting and would make our estimators partially unidentifiable, so we removed it from our data.
 
 # Linear Model Assumptions - Runs and Doubles
 
@@ -112,7 +113,6 @@ qqnorm(batting$RUNS)
 qqline(batting$RUNS)
 ```
 
-
 It is apparent that the relationship between runs and doubles fits the assumptions of a linear model through the inspection of a graph of their relationship and apriori knowledge of the nature of the data.
 
 **- Linearity:** All the points on the relationship plot above are arranged in a very linear way without transformations (a red line has been included to help demonstrate this).
@@ -121,7 +121,7 @@ It is apparent that the relationship between runs and doubles fits the assumptio
 
 **- Independence:** With the knowledge that one batter hitting the ball well enough to get to second base (a double) does not affect the likelihood of the next batter doing the same, we know that the predictors are independent of one another. Additionally, we performed the Durbin-Watson test below which confirms the independence of our variables.
 
-**- Normality:** While our errors do not appear to be normally distributed, our large sample size allows us to leverage the Central Limit Theorem to make meaningful analysis. When we tried to fit our data in such a way that the normality assumption would hold, the other three assumptions broke down. 
+**- Normality:** While our errors do not appear to be normally distributed, our large sample size allows us to leverage the Central Limit Theorem to make meaningful analysis. When we tried to fit our data in such a way that the normality assumption would hold, the other three assumptions broke down.
 
 ```{r}
 library(lmtest)
@@ -138,12 +138,11 @@ anova_lm <- anova(g)
 
 # Hypothesis Testing
 
-## Significance Test 
+## Significance Test
 
 $$H_0: \beta_i=0$$
 
 $$H_a: \beta_1 \neq 0$$
-
 
 $$\alpha = 0.05$$
 
@@ -160,9 +159,10 @@ $\textbf{P Value} \approx 0$
 
 We reject $H_0$ at 0.05 level. Thus, the amount of doubles a player hits is a significant predictor of how many runs the player scores.
 
-## Confidence Intervals 
+## Confidence Intervals
 
 ### Confidence Interval for the Model
+
 ```{r include=FALSE}
 #calculate mean for runs
 sample.mean <- mean(batting$RUNS)
@@ -188,24 +188,17 @@ print(paste("Lower Bound: ", lower.bound))
 print(paste("Upper Bound: ", upper.bound))
 ```
 
-
 ```{r}
 x_bar <- batting %>% select(DOUBLE) %>% summarize(across(everything(), mean))
 ```
-
-
-
-
 
 ```{r}
 predict(g, newdata = x_bar, interval = 'confidence', level = 0.95)
 ```
 
-
 **Interpretation**
 
 We are 95% confident that the mean runs per player is between 201.9707 and 211.2413.
-
 
 ### Confidence Interval of Runs when Doubles = 200
 
@@ -233,14 +226,11 @@ upper.bound <- sample.mean + margin.error
 print(paste("Lower Bound: ", lower.bound))
 print(paste("Upper Bound: ", upper.bound))
 ```
+
 ```{r include = FALSE}
 l.model <- lm(batting$DOUBLE ~ 1, batting)
 confint(l.model, level = 0.95)
 ```
-
-
-
-
 
 ```{r}
 
@@ -254,10 +244,6 @@ batting <- batting %>% slice(-as.numeric(rownames(x_jeremy)))
 predict(g, newdata = x_jeremy, interval = 'prediction', level = 0.95)
 ```
 
-
-
-
-
 **Interpretation**
 
 We are 95% confident that the mean number of runs for a player with 200 doubles is between 397.3753 and 605.1833.
@@ -270,7 +256,6 @@ The $R^2$ value of our model is 0.9551 and the adjusted $R^2$ is 0.9550. This me
 summary(lm(batting$DOUBLE ~ batting$RUNS))
 ```
 
-
 ```{r fig.cap= "Residual Plot of the fitted model"}
 model <- lm(batting$RUNS ~ batting$DOUBLE)
 
@@ -281,4 +266,4 @@ plot(fitted(model), res, ylab = "Residuals", xlab = "Fitted Model")
 
 # Conclusion
 
-The data is approximately what we had expected while we analyzed the relationship between our two quantitative variables, doubles and runs. Our plots were linear and the variance was constant, so we didn’t have to transform the data. We used the Durbin-Watson test to test for correlation in the residuals and the value of 0 indicated independence and a positive correlation between our variables. Through hypothesis testing, we proved that doubles are a significant predictor of runs. The residual plot showed that our model was a good fit and the $R^2$ value of 0.9551 means that the regression explains 95.51% of the variation in our y-variable.
+The data is approximately what we had expected while we analyzed the relationship between our two quantitative variables, doubles and runs. Our plots were linear and the variance was constant, so we didn't have to transform the data. We used the Durbin-Watson test to test for correlation in the residuals and the value of 0 indicated independence and a positive correlation between our variables. Through hypothesis testing, we proved that doubles are a significant predictor of runs. The residual plot showed that our model was a good fit and the $R^2$ value of 0.9551 means that the regression explains 95.51% of the variation in our y-variable.

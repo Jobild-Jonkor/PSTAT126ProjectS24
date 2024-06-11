@@ -2,10 +2,10 @@
 title: "126 Data Project, Step 4"
 date: "Sam Ream, Valeria Lopez, Skyler Yee"
 output:
+  html_document: default
+  word_document: default
   pdf_document:
     latex_engine: xelatex
-  word_document: default
-  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -97,129 +97,105 @@ for ( x in 1:17918)
 batting <-  merge(batting, players, by="player_id" )
 ```
 
-# Introduction
+# Summary
 
-Using the "History of Baseball" data set, we analyzed how our predictors (singles, doubles, triples, home runs, walks, intentional walks, hit by pitches, stolen bases, BMI, and batting hand) affected the runs scores by individual players. We sampled player statistics randomly from games played between 2000-2015, which allowed us to get an accurate representation of the population of all players who played between 2000 and 2015. Using both Ridge Regression and LASSO, we shrunk the size of some predictors to obtain estimates with smaller variance for higher precision. 
-
-```{r eval = FALSE}
-#Final Model
-stat_model <- lm(RUNS~HOME_RUNS + SINGLES + WALKS + STOLEN_BASES, data = batting)
-summary(stat_model)
+```{r fig.cap= "Scatter plot of the relationship between Runs and Doubles"}
+par(mfrow = c(1, 2))
+plot(batting$DOUBLE, batting$RUNS, ylab = "Runs", xlab = "Doubles")
+abline(0,2.4, col="red",)
+abline(-150,2.4, col="blue",)
+abline(200,2.4, col="blue",)
 ```
 
-# Ridge Regression
+```{r fig.cap= "QQ-Plot showing that the data is not normally distributed"}
+qqnorm(batting$RUNS)
+qqline(batting$RUNS)
+```
+
+**- Linearity:** All the points on the relationship plot above are arranged in a very linear way without transformations
+
+**- Constant Variance:** Almost all of the points have a similar distance from a proposed straight line.
+
+**- Independence:** With the knowledge that one batter hitting the ball well enough to get a double does not affect the likelihood of the next batter doing the same, we know that the predictors are independent of one another.
+
+**- Normality:** While our errors do not appear to be normally distributed, our large sample size allows us to leverage the Central Limit Theorem to make meaningful analysis.
+
+```{r include=FALSE}
+slm <- summary(g)
+anova_lm <- anova(g)
+```
+
+# Hypothesis Testing
+
+## Significance Test
+
+$$H_0: \beta_i=0$$
+
+$$H_a: \beta_1 \neq 0$$
+
+$$\alpha = 0.05$$
+
+```{r include=FALSE}
+test_stat <- slm$coefficients[,3][2]
+test_stat #102.942 # from slm
+p_value <- slm$coefficients[,4][2]
+p_value
+```
+
+$\textbf{Test Statistic =}\ 102.942$
+
+$\textbf{P Value} \approx 0$
+
+We reject $H_0$ at 0.05 level. Thus, the amount of doubles a player hits is a significant predictor of how many runs the player scores.
+
+# Fit of Model
+
+The $R^2$ value of our model is 0.9551 and the adjusted $R^2$ is 0.9550. This means that the model explains 95.51% of the variance of the recorded events. Additionally, the residual plot in figure 3 shows how the data points share a similar spread which implies that the model is a good fit.
+
+```{r include=FALSE}
+summary(lm(batting$DOUBLE ~ batting$RUNS))
+```
+
+```{r fig.cap= "Residual Plot of the fitted model"}
+model <- lm(batting$RUNS ~ batting$DOUBLE)
+
+res <- resid(model)
+
+plot(fitted(model), res, ylab = "Residuals", xlab = "Fitted Model")
+```
+
+# Computational Models
+
+For our computational models, we used the predictors: Total Intentional Walks, Singles, Triples, Stolen Bases, and Home Runs obtained in a career. We selected these predictors because of their low correlation in addition to their interesting relation to obtained Runs.
+
+### Model 1 - Full Model ( $\Omega$ )
+
+$\mathbb{E}[Y]=\text{Intercept } + \text{Intentional Walks }+\text{Singles }+\text{Triples }+\text{Stolen Bases }+\text{Home Runs}+\epsilon$
+
+### Model 2 - Reduced Model ( $\omega$ )
+
+$\mathbb{E}[Y]=\text{Intercept } + \text{Singles }+\text{Triples }+\text{Home Runs}+\epsilon$
+
+### Comparison:
+
+$H_0: \beta \in \omega :\text{The Reduced Model is sufficient}$
+
+$H_\alpha: \beta \in \Omega \text{\\} \omega \in w :\text{The Reduced Model is not sufficient}$
 
 ```{r}
-y <- batting$RUNS
-x <- data.matrix(batting[, c('AT_BAT', 'HOME_RUNS', 'SINGLES', 'WALKS', 'STOLEN_BASES', 'WALKS', 'INT_WALKS', 'STOLEN_BASES', 'HIT_BY_PITCH')])
+model_1 <- lm(RUNS~INT_WALKS + SINGLES + TRIPLE + STOLEN_BASES + HOME_RUNS, data = batting)
+model_2 <- lm(RUNS~SINGLES + TRIPLE + HOME_RUNS, data = batting)
+anova(model_1, model_2)
 ```
 
-## Fit the Ridge Regression Model
+### Conclusion
 
-```{r}
-ridge_model <- glmnet(x, y, alpha = 0)
-summary(ridge_model)
-```
+As we rejected \$H_0\$ in favor for \$H\_\\alpha\$, we can determine that the reduced model does not model the data well enough to justify the reduction in predictors. As such, we decided to use model 1, the full model, as our computational model.
 
-## Choose an Optimal Value for Lambda
+# Statistical Model
 
-```{r}
-cv_model_ridge <- cv.glmnet(x, y, alpha = 0)
+We used a stepwise search to create the best model for our data. For a size of 4 predictors the variables home runs, singles, walks, and stolen bases create a well fit model.
 
-# find optimal lambda value that minimizes test MSE
-best_lambda_r <- cv_model_ridge$lambda.min
-best_lambda_r
+# Final Model Selection
 
-# produce plot of test MSE by lambda value
-plot(cv_model_ridge)
-```
-
-The lambda value that minimizes the test MSE is 24.53741.
-
-## Analyze Final Model
-
-```{r}
-#find coefficients of best model
-best_model <- glmnet(x, y, alpha=0, lamba = best_lamba_r)
-
-#coef(best_model_ridge)
-```
-
-```{r}
-# produce ridge trace plot
-plot(ridge_model, xvar = 'lambda')
-```
-
-```{r}
-#calculate R-squared
-y_predicted <- predict(ridge_model, s = best_lambda_r, newx =x)
-
-#SST and SSE
-sst <- sum((y-mean(y))^2)
-sse <- sum((y_predicted - y)^2)
-
-rsq <- 1-(sse/sst)
-rsq
-```
-
-The R-Squared is 0.9914, so the best model explains 99.14% of the variation in the response values.
-
-# LASSO
-
-```{r}
-y <- batting$RUNS
-x <- data.matrix(batting[, c('AT_BAT', 'HOME_RUNS', 'SINGLES', 'WALKS', 'STOLEN_BASES', 'WALKS', 'INT_WALKS', 'STOLEN_BASES', 'HIT_BY_PITCH')])
-```
-
-## Fit the Lasso Regression Model
-
-```{r}
-model <- glmnet(x, y, alpha = 1)
-summary(model)
-```
-
-## Choose an Optimal Value for Lambda
-
-```{r}
-cv_model <- cv.glmnet(x, y, alpha = 1)
-
-# find optimal lambda value that minimizes test MSE
-best_lambda <- cv_model$lambda.min
-best_lambda
-
-# produce plot of test MSE by lambda value
-plot(cv_model)
-```
-
-The lambda value that minimizes the test MSE is 0.364.
-
-## Analyze Final Model
-
-```{r}
-#find coefficients of best model
-best_model <- glmnet(x, y, alpha=1, lamba = best_lamba)
-
-#coef(best_model)
-```
-
-```{r}
-# produce ridge trace plot
-plot(model, xvar = 'lambda')
-```
-
-```{r}
-#calculate R-squared
-y_predicted <- predict(model, s = best_lambda, newx =x)
-
-#SST and SSE
-sst <- sum((y-mean(y))^2)
-sse <- sum((y_predicted - y)^2)
-
-rsq <- 1-(sse/sst)
-rsq
-```
-
-The R-Squared is 0.9936, so the best model explains 99.36% of the variation in the response values.
-
-#Conclusion 
-The data was what we had anticipated because the models had high R squared values, which indicates a large quantity of the variability can be explained by the regression. Using Ridge Regression, which aims to minimize SSE, we saw an R-squared value of 0.9914. Using LASSO regression, which shrinks the less important coefficients to zero, we got an R-squared value of 0.9936.
+Between the two models we created, the statistical model and computational model, we selected the statistical model. The reason behind this selection is that the statistical model has a larger $R_{adj}^2$ value and we want to explain as much of the variance as possible in our model.
