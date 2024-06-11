@@ -27,11 +27,12 @@ library(GGally)
 library(tidymodels)
 library(leaps)
 library(glmnet)
-library(gridExtra)
 ```
+
 ```{r, echo=FALSE}
 ball <- dbConnect(drv=RSQLite::SQLite(), dbname="../../data/database.sqlite")
 ```
+
 ```{r, echo =FALSE}
 batting <- dbGetQuery(ball, "
                             SELECT
@@ -96,61 +97,129 @@ for ( x in 1:17918)
 batting <-  merge(batting, players, by="player_id" )
 ```
 
-```{r}
-# x and y setup with current dataset
-y <- batting$RUNS
-x <- data.matrix(batting[, c('AT_BAT', 'HOME_RUNS', 'SINGLES', 'WALKS', 'STOLEN_BASES', 'WALKS', 'INT_WALKS', 'STOLEN_BASES', 'HIT_BY_PITCH')])
-```
-
-
 # Introduction
 
 Using the "History of Baseball" data set, we analyzed how our predictors (singles, doubles, triples, home runs, walks, intentional walks, hit by pitches, stolen bases, BMI, and batting hand) affected the runs scores by individual players. We sampled player statistics randomly from games played between 2000-2015, which allowed us to get an accurate representation of the population of all players who played between 2000 and 2015. Using both Ridge Regression and LASSO, we shrunk the size of some predictors to obtain estimates with smaller variance for higher precision. 
 
+```{r eval = FALSE}
+#Final Model
+stat_model <- lm(RUNS~HOME_RUNS + SINGLES + WALKS + STOLEN_BASES, data = batting)
+summary(stat_model)
+```
+
 # Ridge Regression
 
-### Summary Table of the Ridge Regression
+```{r}
+y <- batting$RUNS
+x <- data.matrix(batting[, c('AT_BAT', 'HOME_RUNS', 'SINGLES', 'WALKS', 'STOLEN_BASES', 'WALKS', 'INT_WALKS', 'STOLEN_BASES', 'HIT_BY_PITCH')])
+```
+
+## Fit the Ridge Regression Model
 
 ```{r}
 ridge_model <- glmnet(x, y, alpha = 0)
 summary(ridge_model)
 ```
 
-### Optimal Lambda
+## Choose an Optimal Value for Lambda
 
 ```{r}
 cv_model_ridge <- cv.glmnet(x, y, alpha = 0)
 
 # find optimal lambda value that minimizes test MSE
 best_lambda_r <- cv_model_ridge$lambda.min
+best_lambda_r
 
 # produce plot of test MSE by lambda value
 plot(cv_model_ridge)
-print("The best lamda was found to be: ") 
-best_lambda_r
 ```
 
-# Lasso Regression
+The lambda value that minimizes the test MSE is 24.53741.
 
-### Summary Table of the Lasso Regression
+## Analyze Final Model
+
+```{r}
+#find coefficients of best model
+best_model <- glmnet(x, y, alpha=0, lamba = best_lamba_r)
+
+#coef(best_model_ridge)
+```
+
+```{r}
+# produce ridge trace plot
+plot(ridge_model, xvar = 'lambda')
+```
+
+```{r}
+#calculate R-squared
+y_predicted <- predict(ridge_model, s = best_lambda_r, newx =x)
+
+#SST and SSE
+sst <- sum((y-mean(y))^2)
+sse <- sum((y_predicted - y)^2)
+
+rsq <- 1-(sse/sst)
+rsq
+```
+
+The R-Squared is 0.9914, so the best model explains 99.14% of the variation in the response values.
+
+# LASSO
+
+```{r}
+y <- batting$RUNS
+x <- data.matrix(batting[, c('AT_BAT', 'HOME_RUNS', 'SINGLES', 'WALKS', 'STOLEN_BASES', 'WALKS', 'INT_WALKS', 'STOLEN_BASES', 'HIT_BY_PITCH')])
+```
+
+## Fit the Lasso Regression Model
 
 ```{r}
 model <- glmnet(x, y, alpha = 1)
 summary(model)
 ```
 
-### Optimal Lambda
+## Choose an Optimal Value for Lambda
 
+```{r}
+cv_model <- cv.glmnet(x, y, alpha = 1)
 
+# find optimal lambda value that minimizes test MSE
+best_lambda <- cv_model$lambda.min
+best_lambda
 
-# Comparison of our Models
+# produce plot of test MSE by lambda value
+plot(cv_model)
+```
 
+The lambda value that minimizes the test MSE is 0.364.
 
+## Analyze Final Model
 
-# Investigation - Principle Component Analysis
+```{r}
+#find coefficients of best model
+best_model <- glmnet(x, y, alpha=1, lamba = best_lamba)
 
+#coef(best_model)
+```
 
+```{r}
+# produce ridge trace plot
+plot(model, xvar = 'lambda')
+```
 
-# Conclusion
+```{r}
+#calculate R-squared
+y_predicted <- predict(model, s = best_lambda, newx =x)
 
+#SST and SSE
+sst <- sum((y-mean(y))^2)
+sse <- sum((y_predicted - y)^2)
 
+rsq <- 1-(sse/sst)
+rsq
+```
+
+The R-Squared is 0.9936, so the best model explains 99.36% of the variation in the response values.
+
+#Conclusion 
+The data was what we had anticipated because the models had high R squared values, which indicates a large quantity of the variability can be explained by the regression. Using Ridge Regression, which aims to minimize SSE, we saw an R-squared value of 0.9914. Using LASSO regression, which shrinks the less important coefficients to zero, we got an R-squared value of 0.9936.
