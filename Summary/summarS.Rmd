@@ -1,0 +1,201 @@
+---
+title: "126 Data Project, Step 4"
+date: "Sam Ream, Valeria Lopez, Skyler Yee"
+output:
+  html_document: default
+  word_document: default
+  pdf_document:
+    latex_engine: xelatex
+---
+
+```{r setup, include=FALSE}
+# knit options
+knitr::opts_chunk$set(echo = F,
+                      results = 'markup',
+                      fig.width = 4,
+                      fig.height = 3,
+                      fig.align = 'center',
+                      message = F,
+                      warning = F)
+
+# packages
+library(tidyverse)
+library(faraway)
+library(RSQLite)
+library(skimr)
+library(GGally)
+library(tidymodels)
+library(leaps)
+library(glmnet)
+```
+
+```{r, echo=FALSE}
+ball <- dbConnect(drv=RSQLite::SQLite(), dbname="../../data/database.sqlite")
+```
+
+```{r, echo =FALSE}
+batting <- dbGetQuery(ball, "
+                            SELECT
+                            sum(ab) AS AT_BAT,
+                            player_id,
+                            sum(r) AS RUNS,
+                            sum(hr) AS HOME_RUNS, 
+                            sum(triple) AS TRIPLE,
+                            sum(double) AS DOUBLE,
+                            (sum(h) -  sum(hr) - sum(triple) - sum(double)) AS SINGLES,
+                            sum(bb) AS WALKS,
+                            sum(ibb) AS INT_WALKS,
+                            sum(sb) AS STOLEN_BASES,
+                            sum(hbp) AS HIT_BY_PITCH
+                            
+                            FROM
+                            batting
+                            where
+                            year > 2000
+                            group by
+                            player_id
+                            
+                   ")
+sumbat <- batting
+batting <- subset(batting,batting[,1]>100)
+
+
+for (x in 3:11) 
+{
+  batting[,x] <- batting[,x] / 1
+}
+
+set.seed(5)
+batting <- sample_n(batting, 500, replace = FALSE)
+
+players <- dbGetQuery(ball, "
+                      
+                      SELECT 
+                      player_id,
+                      (weight / POWER(height, 2)) *703 AS BMI,
+                      bats as HAND
+                      FROM
+                      player
+                      
+                      ")
+
+
+
+
+players <- subset(players, players[,2]>0)
+
+
+
+for ( x in 1:17918)
+{
+  if(players[x,2] <= 18.5) {players[x,2] <- "U"} 
+  else if(players[x,2] <= 24.9) {players[x,2] <- "H"}
+  else if(players[x,2] <= 29.9) {players[x,2] <- "O"}
+  else {players[x,2] <- "B"}
+}
+
+batting <-  merge(batting, players, by="player_id" )
+```
+
+# Summary
+
+```{r fig.cap= "Scatter plot of the relationship between Runs and Doubles"}
+par(mfrow = c(1, 2))
+plot(batting$DOUBLE, batting$RUNS, ylab = "Runs", xlab = "Doubles")
+abline(0,2.4, col="red",)
+abline(-150,2.4, col="blue",)
+abline(200,2.4, col="blue",)
+```
+
+```{r fig.cap= "QQ-Plot showing that the data is not normally distributed"}
+qqnorm(batting$RUNS)
+qqline(batting$RUNS)
+```
+
+**- Linearity:** All the points on the relationship plot above are arranged in a very linear way without transformations
+
+**- Constant Variance:** Almost all of the points have a similar distance from a proposed straight line.
+
+**- Independence:** With the knowledge that one batter hitting the ball well enough to get a double does not affect the likelihood of the next batter doing the same, we know that the predictors are independent of one another.
+
+**- Normality:** While our errors do not appear to be normally distributed, our large sample size allows us to leverage the Central Limit Theorem to make meaningful analysis.
+
+```{r include=FALSE}
+slm <- summary(g)
+anova_lm <- anova(g)
+```
+
+# Hypothesis Testing
+
+## Significance Test
+
+$$H_0: \beta_i=0$$
+
+$$H_a: \beta_1 \neq 0$$
+
+$$\alpha = 0.05$$
+
+```{r include=FALSE}
+test_stat <- slm$coefficients[,3][2]
+test_stat #102.942 # from slm
+p_value <- slm$coefficients[,4][2]
+p_value
+```
+
+$\textbf{Test Statistic =}\ 102.942$
+
+$\textbf{P Value} \approx 0$
+
+We reject $H_0$ at 0.05 level. Thus, the amount of doubles a player hits is a significant predictor of how many runs the player scores.
+
+# Fit of Model
+
+The $R^2$ value of our model is 0.9551, which means that the model explains 95.51% of the variance of the recorded events. Additionally, the residual plot in figure 3 shows how the data points share a similar spread which implies that the model is a good fit.
+
+```{r include=FALSE}
+summary(lm(batting$DOUBLE ~ batting$RUNS))
+```
+
+```{r fig.cap= "Residual Plot of the fitted model"}
+model <- lm(batting$RUNS ~ batting$DOUBLE)
+
+res <- resid(model)
+
+plot(fitted(model), res, ylab = "Residuals", xlab = "Fitted Model")
+```
+
+# Computational Models
+
+For our computational models, we used the predictors: Total Intentional Walks, Singles, Triples, Stolen Bases, and Home Runs obtained in a career. We selected these predictors because of their low correlation in addition to their interesting relation to obtained Runs.
+
+### Model 1 - Full Model ( $\Omega$ )
+
+$\mathbb{E}[Y]=\text{Intercept } + \text{Intentional Walks }+\text{Singles }+\text{Triples }+\text{Stolen Bases }+\text{Home Runs}+\epsilon$
+
+### Model 2 - Reduced Model ( $\omega$ )
+
+$\mathbb{E}[Y]=\text{Intercept } + \text{Singles }+\text{Triples }+\text{Home Runs}+\epsilon$
+
+### Comparison:
+
+$H_0: \beta \in \omega :\text{The Reduced Model is sufficient}$
+
+$H_\alpha: \beta \in \Omega \text{\\} \omega \in w :\text{The Reduced Model is not sufficient}$
+
+```{r}
+model_1 <- lm(RUNS~INT_WALKS + SINGLES + TRIPLE + STOLEN_BASES + HOME_RUNS, data = batting)
+model_2 <- lm(RUNS~SINGLES + TRIPLE + HOME_RUNS, data = batting)
+anova(model_1, model_2)
+```
+
+### Conclusion
+
+As we rejected \$H_0\$ in favor for \$H\_\\alpha\$, we can determine that the reduced model does not model the data well enough to justify the reduction in predictors. As such, we decided to use model 1, the full model, as our computational model.
+
+# Statistical Model
+
+We used a stepwise search to create the best model for our data. For a size of 4 predictors the variables home runs, singles, walks, and stolen bases create a well fit model.
+
+# Final Model Selection
+
+Between the two models we created, the statistical model and computational model, we selected the statistical model. The reason behind this selection is that the statistical model has a larger $R_{adj}^2$ value and we want to explain as much of the variance as possible in our model.

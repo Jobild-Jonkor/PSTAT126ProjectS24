@@ -98,7 +98,7 @@ batting <-  merge(batting, players, by="player_id" )
 ```{r}
 # x and y setup with current dataset
 y <- batting$RUNS
-x <- data.matrix(batting[, c('AT_BAT', 'TRIPLE', 'HOME_RUNS', 'SINGLES', 'WALKS', 'DOUBLE', 'INT_WALKS', 'STOLEN_BASES', 'HIT_BY_PITCH')])
+x <- data.matrix(batting[, c('TRIPLE', 'HOME_RUNS', 'SINGLES', 'WALKS', 'DOUBLE', 'INT_WALKS', 'STOLEN_BASES', 'HIT_BY_PITCH')])
 ```
 
 
@@ -118,27 +118,26 @@ Using the "History of Baseball" data set, we analyzed how our predictors (single
 ### Correlation Table
 
 ```{r}
-tempco <- round(cor(batting[,c('AT_BAT', 'TRIPLE', 'HOME_RUNS', 'SINGLES', 'WALKS', 'DOUBLE', 'INT_WALKS', 'STOLEN_BASES', 'HIT_BY_PITCH')]), 2)
+tempco <- round(cor(batting[,c('TRIPLE', 'HOME_RUNS', 'SINGLES', 'WALKS', 'DOUBLE', 'INT_WALKS', 'STOLEN_BASES', 'HIT_BY_PITCH')]), 2)
 ik <- 1
 ```
 
-|    |AB|T|HR|S|W|D|IW|SB|HBP|
-|:-----|---:|---:|---:|------:|---:|---:|-----:|-----:|-----:|
-|AT_BAT (AB)|`r tempco[ik,1]`|`r tempco[ik,2]`|`r tempco[ik,3]`|`r tempco[ik,4]`|`r tempco[ik,5]`|`r tempco[ik,6]`|`r tempco[ik,7]`|`r tempco[ik,8]`|`r tempco[ik,9]` `r ik <- ik+1`|
-|TRIPLE (T)|`r tempco[ik,1]`|`r tempco[ik,2]`|`r tempco[ik,3]`|`r tempco[ik,4]`|`r tempco[ik,5]`|`r tempco[ik,6]`|`r tempco[ik,7]`|`r tempco[ik,8]`|`r tempco[ik,9]` `r ik <- ik+1`|
-|HOME_RUNS (HR)|`r tempco[ik,1]`|`r tempco[ik,2]`|`r tempco[ik,3]`|`r tempco[ik,4]`|`r tempco[ik,5]`|`r tempco[ik,6]`|`r tempco[ik,7]`|`r tempco[ik,8]`|`r tempco[ik,9]` `r ik <- ik+1`|
-|SINGLES (S)|`r tempco[ik,1]`|`r tempco[ik,2]`|`r tempco[ik,3]`|`r tempco[ik,4]`|`r tempco[ik,5]`|`r tempco[ik,6]`|`r tempco[ik,7]`|`r tempco[ik,8]`|`r tempco[ik,9]` `r ik <- ik+1`|
-|WALKS (W)|`r tempco[ik,1]`|`r tempco[ik,2]`|`r tempco[ik,3]`|`r tempco[ik,4]`|`r tempco[ik,5]`|`r tempco[ik,6]`|`r tempco[ik,7]`|`r tempco[ik,8]`|`r tempco[ik,9]` `r ik <- ik+1`|
-|DOUBLE (D)|`r tempco[ik,1]`|`r tempco[ik,2]`|`r tempco[ik,3]`|`r tempco[ik,4]`|`r tempco[ik,5]`|`r tempco[ik,6]`|`r tempco[ik,7]`|`r tempco[ik,8]`|`r tempco[ik,9]` `r ik <- ik+1`|
-|INT_WALKS (IW)|`r tempco[ik,1]`|`r tempco[ik,2]`|`r tempco[ik,3]`|`r tempco[ik,4]`|`r tempco[ik,5]`|`r tempco[ik,6]`|`r tempco[ik,7]`|`r tempco[ik,8]`|`r tempco[ik,9]` `r ik <- ik+1`|
-|STOLEN_BASES (SB)|`r tempco[ik,1]`|`r tempco[ik,2]`|`r tempco[ik,3]`|`r tempco[ik,4]`|`r tempco[ik,5]`|`r tempco[ik,6]`|`r tempco[ik,7]`|`r tempco[ik,8]`|`r tempco[ik,9]` `r ik <- ik+1`|
-|HIT_BY_PITCH (HBP)|`r tempco[ik,1]`|`r tempco[ik,2]`|`r tempco[ik,3]`|`r tempco[ik,4]`|`r tempco[ik,5]`|`r tempco[ik,6]`|`r tempco[ik,7]`|`r tempco[ik,8]`|`r tempco[ik,9]` `r ik <- ik+1`||
+|    |T|HR|S|W|D|IW|SB|HBP|
+|:-----|---:|---:|---:|------:|---:|-----:|-----:|-----:|
+|TRIPLE (T))|`r tempco[ik,1]`|`r tempco[ik,2]`|`r tempco[ik,3]`|`r tempco[ik,4]`|`r tempco[ik,5]`|`r tempco[ik,6]`|`r tempco[ik,7]`|`r tempco[ik,8]` `r ik <- ik+1`|
+|HOME_RUNS (HR)|`r tempco[ik,1]`|`r tempco[ik,2]`|`r tempco[ik,3]`|`r tempco[ik,4]`|`r tempco[ik,5]`|`r tempco[ik,6]`|`r tempco[ik,7]`|`r tempco[ik,8]` `r ik <- ik+1`|
+|SINGLES (S)|`r tempco[ik,1]`|`r tempco[ik,2]`|`r tempco[ik,3]`|`r tempco[ik,4]`|`r tempco[ik,5]`|`r tempco[ik,6]`|`r tempco[ik,7]`|`r tempco[ik,8]` `r ik <- ik+1`|
+|WALKS (W)|`r tempco[ik,1]`|`r tempco[ik,2]`|`r tempco[ik,3]`|`r tempco[ik,4]`|`r tempco[ik,5]`|`r tempco[ik,6]`|`r tempco[ik,7]`|`r tempco[ik,8]` `r ik <- ik+1`|
+|DOUBLE (D)|`r tempco[ik,1]`|`r tempco[ik,2]`|`r tempco[ik,3]`|`r tempco[ik,4]`|`r tempco[ik,5]`|`r tempco[ik,6]`|`r tempco[ik,7]`|`r tempco[ik,8]` `r ik <- ik+1`|
+|INT_WALKS (IW)|`r tempco[ik,1]`|`r tempco[ik,2]`|`r tempco[ik,3]`|`r tempco[ik,4]`|`r tempco[ik,5]`|`r tempco[ik,6]`|`r tempco[ik,7]`|`r tempco[ik,8]` `r ik <- ik+1`|
+|STOLEN_BASES (SB)|`r tempco[ik,1]`|`r tempco[ik,2]`|`r tempco[ik,3]`|`r tempco[ik,4]`|`r tempco[ik,5]`|`r tempco[ik,6]`|`r tempco[ik,7]`|`r tempco[ik,8]` `r ik <- ik+1`|
+|HIT_BY_PITCH (HBP)|`r tempco[ik,1]`|`r tempco[ik,2]`|`r tempco[ik,3]`|`r tempco[ik,4]`|`r tempco[ik,5]`|`r tempco[ik,6]`|`r tempco[ik,7]`|`r tempco[ik,8]` `r ik <- ik+1`||
 
 
 ### Variance Inflation factor Table
 
 ```{r}
-modmat <- model.matrix(lm(RUNS~AT_BAT + TRIPLE + HOME_RUNS + SINGLES + WALKS + DOUBLE + INT_WALKS + STOLEN_BASES + HIT_BY_PITCH, data=batting))
+modmat <- model.matrix(lm(RUNS~TRIPLE + HOME_RUNS + SINGLES + WALKS + DOUBLE + INT_WALKS + STOLEN_BASES + HIT_BY_PITCH, data=batting))
 vif(modmat)
 ```
 ## Analysis
@@ -178,7 +177,6 @@ sst <- sum((y-mean(y))^2)
 sse <- sum((y_predicted - y)^2)
 
 rsq <- 1-(sse/sst)
-rsq
 ```
 
 When Lambda equals `r best_lambda_r`, the R-Squared is `r rsq`. This implies that the model explains approximately `r round(rsq*100,2)`% of the variation in the response in our training data set.
@@ -299,7 +297,7 @@ batting <-  merge(batting, players, by="player_id" )
 
 ```
 ```{r}
-x <- data.matrix(batting[, c('AT_BAT', 'TRIPLE', 'HOME_RUNS', 'SINGLES', 'WALKS', 'DOUBLE', 'INT_WALKS', 'STOLEN_BASES', 'HIT_BY_PITCH')])
+x <- data.matrix(batting[, c('TRIPLE', 'HOME_RUNS', 'SINGLES', 'WALKS', 'DOUBLE', 'INT_WALKS', 'STOLEN_BASES', 'HIT_BY_PITCH')])
 ```
 
 ```{r}
