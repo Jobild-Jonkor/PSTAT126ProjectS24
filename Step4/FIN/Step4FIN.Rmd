@@ -126,7 +126,6 @@ best_lambda_r <- cv_model_ridge$lambda.min
 # produce plot of test MSE by lambda value
 plot(cv_model_ridge)
 
-
 ```
 
 We found that the MSE was minimized when $\lambda$ is equal to:
@@ -154,15 +153,11 @@ rsq
 
 When Lambda equals 24.53741, the R-Squared is 0.9914. This implies that the model explains approximately 99.14% of the variation in the response values..
 
-#### MSE Analysis
+#### Coefficient Analysis
 
 ```{r}
-ridge_model_y_predictions <- data.frame(Prediction = 1:500, Actual= 1:500)
-ridge_model_y_predictions[,1] <- predict(ridge_model, s = best_lambda_r, newx = x)
-ridge_model_y_predictions[,2] <- batting$RUNS
-
-MSE_ridge <- (1/500) * sum((ridge_model_y_predictions[,2]-ridge_model_y_predictions[,1])^2)
-MSE_ridge
+temp_ridge <- cv.glmnet(x, y, alpha = 0)
+coef(temp_ridge)
 ```
 
 # Lasso Regression
@@ -207,15 +202,11 @@ rsq <- 1-(sse/sst)
 
 When Lambda equals 0.3643727, the R-Squared is 0.9935687. This implies that the model explains approximately 99.36% of the variation in the response values.
 
-#### MSE Analysis
+#### Coefficient Analysis
 
 ```{r}
-lasso_model_y_predictions <- data.frame(Prediction = 1:500, Actual = 1:500)
-lasso_model_y_predictions[,1] <- predict(cv_model, s = best_lambda, newx = x)
-lasso_model_y_predictions[,2] <- batting$RUNS
-
-MSE_lasso <- (1/500) * sum((lasso_model_y_predictions[,2]-lasso_model_y_predictions[,1])^2)
-MSE_lasso
+temp_lasso <- glmnet(x, y, alpha = 1, lambda = best_lambda)
+coef(temp_ridge)
 ```
 
 # Comparison of our Models
@@ -348,6 +339,11 @@ There is a plot above this
 
 # Investigation - Principle Component Analysis
 
+Waiting for sam's work
+
 # Conclusion
 
+GDRIVE - PSTAT126_PROJ_STEP_4_CONC
+
+(Everything is still temp above, will finalize tomorrow well before 3pm)
 
