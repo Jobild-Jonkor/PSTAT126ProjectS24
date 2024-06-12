@@ -211,6 +211,40 @@ Between the two models we created, the statistical model and computational model
 
 We implemented a Ridge and Lasso regression on the entire set of predictors to make a model that fits well. While the Lasso regression did not eliminate any predictors, it did result in the best fit of all the previoud models as can be demonstrated in the plot and table below.
 
+
+
+
+
+
+```{r}
+
+y <- batting$RUNS
+x <- data.matrix(batting[, c('TRIPLE', 'HOME_RUNS', 'SINGLES', 'WALKS', 'DOUBLE', 'INT_WALKS', 'STOLEN_BASES', 'HIT_BY_PITCH')])
+
+stat_model <- lm(RUNS~HOME_RUNS + SINGLES + WALKS + STOLEN_BASES, data = batting)
+slm <- lm(RUNS~DOUBLE, data = batting)
+
+
+# find optimal lambda value that minimizes test MSE
+best_lambda_r <- cv_model_ridge$lambda.min
+
+cv_model <- cv.glmnet(x, y, alpha = 1)
+
+# find optimal lambda value that minimizes test MSE
+best_lambda <- cv_model$lambda.min
+
+model <- glmnet(x, y, alpha = 1)
+
+ridge_model <- glmnet(x, y, alpha = 0)
+
+cv_model_ridge <- cv.glmnet(x, y, alpha = 0)
+
+```
+
+
+
+
+
 ```{r, echo =FALSE}
 batting <- dbGetQuery(ball, "
                             SELECT
@@ -271,6 +305,15 @@ batting <-  merge(batting, players, by="player_id" )
 ```
 ```{r}
 x <- data.matrix(batting[, c('TRIPLE', 'HOME_RUNS', 'SINGLES', 'WALKS', 'DOUBLE', 'INT_WALKS', 'STOLEN_BASES', 'HIT_BY_PITCH')])
+
+
+
+
+
+
+
+
+
 ```
 
 ```{r}
@@ -306,8 +349,6 @@ ggplot() +
   
   geom_point(aes(x=Prediction, y=Actual, color="Lasso Model"), lasso_model_y_predictions, size =0.25 )+
   geom_smooth(aes(x=Prediction, y=Actual, color="Lasso Model"), lasso_model_y_predictions, method = lm, fullrange =TRUE, size = 0.75)+
-  
-
   
   labs(color = "Model")
 ```
