@@ -117,7 +117,9 @@ intro:
 
 Using the "History of Baseball" data set, we analyzed how our predictors (singles, doubles, triples, home runs, walks, intentional walks, hit by pitches, stolen bases, BMI, and batting hand) affected the runs scores by individual players. We sampled player statistics randomly from games played between 2000-2015, which allowed us to get an accurate representation of the population of all players who played between 2000 and 2015. Using both Ridge Regression and LASSO, we shrunk the size of some predictors to obtain estimates with smaller variance for higher precision.
 
-#Conclusion The data was what we had anticipated because the models had high R squared values, which indicates a large quantity of the variability can be explained by the regression. Using Ridge Regression, which aims to minimize SSE, we saw an R-squared value of 0.9914. Using LASSO regression, which shrinks the less important coefficients to zero, we got an R-squared value of 0.9936.
+#Conclusion 
+
+The data was what we had anticipated because the models had high R squared values, which indicates a large quantity of the variability can be explained by the regression. Using Ridge Regression, which aims to minimize SSE, we saw an R-squared value of 0.9914. Using LASSO regression, which shrinks the less important coefficients to zero, we got an R-squared value of 0.9936.
 
 # Innovation Step: Principal Components Analysis
 
@@ -125,60 +127,52 @@ We chose Principal Components Analysis for our innovation because this method is
 
 Let $\mathbf{X'} = (X_1, X_2,...X_k)$ and $\mathbf{u'}$ be a $p\times1$ vector of constants such that $\mathbf{u}_1'\mathbf{u}_1=1$. The first principal component will be the linear combination $Z_1=\mathbf{u'X}$ such that the variance of $Z_1 = \mathbf{u}_1'\text{Var}(\mathbf{X})\mathbf{u}_1$ is as large as possible to retain as much as the variation in the predictors as possible. If $\text{Var}(\mathbf{X})$ is known, then $\mathbf{u}_i$'s are the eigenvectors that corresponds to the $k_0$ largest eigenvalues of $\text{Var}(\mathbf{X})$. If $\text{Var}(\mathbf{X})$ is unknown, like in our case, we replace the variance matrix with the sample covariance matrix.
 
-First we normalize the data by dividing by the sample standard deviation, compute the PCA using the sample correlation matrix, and assess the cumulative proportion of each principal component to see which principal components explain the most of the total variance. Then look at the loading matrix to see how these principal components relate to each column of our data.
-
-
+First we normalize the data by dividing by the sample standard deviation. Then, we use the sample correlation matrix to compute our eigenvalues ($\hat{\lambda}_j$) and select the values with the highest variances. Now, we compute the corresponding eigenvectors ($\mathbf{\hat{u}}_j$) and multiply them by $\mathbf{X'}$. These are our principal components $Z_j$.
 
 ### Calculations
 
 ```{r}
-# Removing unneccessary columns
-head(batting)
+# Removing unnecessary columns
 numerical_data <- batting[,4:11]
-head(numerical_data)
 
 # Data normalization
 data_normalized <- scale(numerical_data)
-head(data_normalized)
 
-# PCA computation
+# PCA computation - computing our eigenvalues
 data.pca <- princomp(data_normalized)
-summary(data.pca)
-
-data.pca$comp.1
+summary(data.pca) # components one and two have the highest variance
 
 # Loading matrix
-data.pca$loadings[, 1:2] # come back: using right components?
+data.pca$loadings[, 1:2] # weights of component one are pretty evenly spread, while component two puts more weight on hit by pitch and triples
 ```
 
 ### Visualizations
 
 ```{r}
-# Scree plot - importance of each component 
+# Scree plot - importance of each component//contribution to total variance
 fviz_eig(data.pca, addlabels=TRUE)
+```
+This plot displays the eigenvalues and shows us that the first two components contribute the most the total variance.
 
-# Biplot of the attributes - visualize similiarities between samples and see impact of each attribute on components
+```{r, include = FALSE}
+# Biplot of the attributes - visualize similarities between samples and see impact of each attribute on components
 fviz_pca_var(data.pca, col.var="black")
 
-# Contribution of each variable - how much each variable is represented in a given component (utilizing the square of cosine) 
+# Contribution of each variable - how much each variable is represented in a given component (utilizing square cosine) 
 # High value means good representation
 fviz_cos2(data.pca, choice="var", axes=1:2)
+```
 
-# Biplot combined with cos2 - attributes with similar cos2 scores will have similar colors
+```{r}
+# Biplot combined with cos2
 fviz_pca_var(data.pca, col.var = "cos2",
             gradient.cols = c("black", "orange", "green"),
             repel = TRUE)
-
-# Doubles contributes the most; home runs, walks, singles, triples, and stolen bases also contribute highly
-# home runs, walks, doubles, singles positively correlated
-# triples, singles, stolen bases negatively correlated
-# all have similar magnitude (distance from origin)
-
-# choose home runs, walks, doubles 
 ```
+In this plot, predictors that are grouped together are correlated to each other. In our case, home runs, intentional walks, hit by pitches, walks, doubles and singles are positively correlated together in both components. Additionally, stolen bases and triples are correlated to each other positively in component one and negatively in component two. Finally, from this plot we can see that predictors that are farther from the origin and closer to green (representing a high square cosine) are better represented. For our predictors, they are all represented fairly similarly, with doubles being the most and hit by pitches and intentional walks falling behind.
 
 ### Analysis
-By looking at our calculations and visualizations, we can see that 
+By looking at our calculations and visualizations, we can see that the first two components capture almost all of the variance in our predictors, so we would select these for our model. The weights of component one are fairly evenly distributed over the predictors while component two puts more weight on stolen basees and triples.
 
 ### Problems that Could Arise
 
