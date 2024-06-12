@@ -58,12 +58,6 @@ batting <- dbGetQuery(ball, "
 sumbat <- batting
 batting <- subset(batting,batting[,1]>100)
 
-
-for (x in 3:11) 
-{
-  batting[,x] <- batting[,x] / 1
-}
-
 set.seed(5)
 batting <- sample_n(batting, 500, replace = FALSE)
 
@@ -96,10 +90,18 @@ for ( x in 1:17918)
 batting <-  merge(batting, players, by="player_id" )
 ```
 
+
 ```{r}
 # x and y setup with current dataset
 y <- batting$RUNS
-x <- data.matrix(batting[, c('AT_BAT', 'HOME_RUNS', 'SINGLES', 'WALKS', 'STOLEN_BASES', 'WALKS', 'INT_WALKS', 'STOLEN_BASES', 'HIT_BY_PITCH')])
+x <- data.matrix(batting[, c('AT_BAT', 'HOME_RUNS', 'SINGLES', 'WALKS', 'DOUBLE', 'INT_WALKS', 'STOLEN_BASES', 'HIT_BY_PITCH')])
+```
+
+
+```{r echo = FALSE}
+stat_model <- lm(RUNS~HOME_RUNS + SINGLES + WALKS + STOLEN_BASES, data = batting)
+slm <- lm(RUNS~DOUBLE, data = batting)
+
 ```
 
 
@@ -123,6 +125,8 @@ best_lambda_r <- cv_model_ridge$lambda.min
 
 # produce plot of test MSE by lambda value
 plot(cv_model_ridge)
+
+
 ```
 
 We found that the MSE was minimized when $\lambda$ is equal to:
@@ -132,6 +136,8 @@ best_lambda_r
 
 
 ### Model Analysis
+
+
 
 #### R-Squared Analysis
 ```{r}
@@ -143,13 +149,21 @@ sst <- sum((y-mean(y))^2)
 sse <- sum((y_predicted - y)^2)
 
 rsq <- 1-(sse/sst)
-#rsq
+rsq
 ```
 
 When Lambda equals 24.53741, the R-Squared is 0.9914. This implies that the model explains approximately 99.14% of the variation in the response values..
 
 #### MSE Analysis
 
+```{r}
+ridge_model_y_predictions <- data.frame(Prediction = 1:500, Actual= 1:500)
+ridge_model_y_predictions[,1] <- predict(ridge_model, s = best_lambda_r, newx = x)
+ridge_model_y_predictions[,2] <- batting$RUNS
+
+MSE_ridge <- (1/500) * sum((ridge_model_y_predictions[,2]-ridge_model_y_predictions[,1])^2)
+MSE_ridge
+```
 
 # Lasso Regression
 
@@ -164,7 +178,6 @@ cv_model <- cv.glmnet(x, y, alpha = 1)
 
 # find optimal lambda value that minimizes test MSE
 best_lambda <- cv_model$lambda.min
-best_lambda
 
 # produce plot of test MSE by lambda value
 plot(cv_model)
@@ -196,14 +209,144 @@ When Lambda equals 0.3643727, the R-Squared is 0.9935687. This implies that the 
 
 #### MSE Analysis
 
+```{r}
+lasso_model_y_predictions <- data.frame(Prediction = 1:500, Actual = 1:500)
+lasso_model_y_predictions[,1] <- predict(cv_model, s = best_lambda, newx = x)
+lasso_model_y_predictions[,2] <- batting$RUNS
+
+MSE_lasso <- (1/500) * sum((lasso_model_y_predictions[,2]-lasso_model_y_predictions[,1])^2)
+MSE_lasso
+```
 
 # Comparison of our Models
 
+There is a plot below this
 
+```{r, echo =FALSE}
+batting <- dbGetQuery(ball, "
+                            SELECT
+                            sum(ab) AS AT_BAT,
+                            player_id,
+                            sum(r) AS RUNS,
+                            sum(hr) AS HOME_RUNS, 
+                            sum(triple) AS TRIPLE,
+                            sum(double) AS DOUBLE,
+                            (sum(h) -  sum(hr) - sum(triple) - sum(double)) AS SINGLES,
+                            sum(bb) AS WALKS,
+                            sum(ibb) AS INT_WALKS,
+                            sum(sb) AS STOLEN_BASES,
+                            sum(hbp) AS HIT_BY_PITCH
+                            
+                            FROM
+                            batting
+                            where
+                            year > 2000
+                            group by
+                            player_id
+                            
+                   ")
+sumbat <- batting
+batting <- subset(batting,batting[,1]>100)
+
+set.seed(4)
+batting <- sample_n(batting, 500, replace = FALSE)
+
+players <- dbGetQuery(ball, "
+                      
+                      SELECT 
+                      player_id,
+                      (weight / POWER(height, 2)) *703 AS BMI,
+                      bats as HAND
+                      FROM
+                      player
+                      
+                      ")
+
+
+
+
+players <- subset(players, players[,2]>0)
+
+
+
+for ( x in 1:17918)
+{
+  if(players[x,2] <= 18.5) {players[x,2] <- "U"} 
+  else if(players[x,2] <= 24.9) {players[x,2] <- "H"}
+  else if(players[x,2] <= 29.9) {players[x,2] <- "O"}
+  else {players[x,2] <- "B"}
+}
+
+batting <-  merge(batting, players, by="player_id" )
+
+```
+```{r}
+x <- data.matrix(batting[, c('AT_BAT', 'HOME_RUNS', 'SINGLES', 'WALKS', 'DOUBLE', 'INT_WALKS', 'STOLEN_BASES', 'HIT_BY_PITCH')])
+```
+
+```{r}
+ridge_model_y_predictions <- data.frame(Prediction = 1:500, Actual= 1:500)
+ridge_model_y_predictions[,1] <- predict(ridge_model, s = best_lambda_r, newx = x)
+ridge_model_y_predictions[,2] <- batting$RUNS
+
+lasso_model_y_predictions <- data.frame(Prediction = 1:500, Actual = 1:500)
+lasso_model_y_predictions[,1] <- predict(cv_model, s = best_lambda, newx = x)
+lasso_model_y_predictions[,2] <- batting$RUNS
+
+
+stat_model_y_predictions <- data.frame(Prediction = 1:500, Actual = 1:500)
+stat_model_y_predictions[,1] <- predict(stat_model, newdata = batting)
+stat_model_y_predictions[,2] <- batting$RUNS
+
+slm_y_predictions <- data.frame(Prediction = 1:500, Actual = 1:500)
+slm_y_predictions[,1] <- predict(slm, newdata = batting)
+slm_y_predictions[,2] <- batting$RUNS
+```
+
+\newpage
+
+```{r}
+#Rsquare finder
+#SLR
+#MLR
+#Ridge
+#Lasso
+
+
+
+```
+
+
+```{r, fig.width=7,fig.height=2, fig.cap="A comparison of the Linear Models"}
+ggplot() + 
+  
+  geom_point(aes(x=Prediction, y=Actual, color="SLM"), slm_y_predictions, size =0.5 )+
+  geom_smooth(aes(x=Prediction, y=Actual, color="SLM"), slm_y_predictions, method = lm, fullrange =TRUE)+
+  
+  geom_point(aes(x=Prediction, y=Actual, color="MLR"), stat_model_y_predictions,size = 0.5) + 
+  geom_smooth(aes(x=Prediction, y=Actual, color="MLR"), stat_model_y_predictions, method = lm, fullrange =TRUE)+
+  
+  geom_point(aes(x=Prediction, y=Actual, color="Ridge Model"), ridge_model_y_predictions, size =0.5)+
+  geom_smooth(aes(x=Prediction, y=Actual, color="Ridge Model"), ridge_model_y_predictions, method = lm, fullrange =TRUE)+
+  
+  geom_point(aes(x=Prediction, y=Actual, color="Lasso Model"), lasso_model_y_predictions, size =0.5 )+
+  geom_smooth(aes(x=Prediction, y=Actual, color="Lasso Model"), lasso_model_y_predictions, method = lm, fullrange =TRUE)+
+  
+
+  
+  labs(color = "Model")
+```
+
+|       Model Type          |  $R^2$ | MSE |
+|:-----------------|----:|---:|
+|SLR              | `r 1-(sum((slm_y_predictions[,1]-slm_y_predictions[,2])^2)/sum((slm_y_predictions[,2]-sum(slm_y_predictions[,2])/500)^2))`|   `r (1/500) * sum((slm_y_predictions[,2]-slm_y_predictions[,1])^2)`|
+|MLR              | `r 1-(sum((stat_model_y_predictions[,1]-stat_model_y_predictions[,2])^2)/sum((stat_model_y_predictions[,2]-sum(stat_model_y_predictions[,2])/500)^2))`|   `r (1/500) * sum((stat_model_y_predictions[,2]-stat_model_y_predictions[,1])^2)`|
+|Ridge Regression | `r 1-(sum((ridge_model_y_predictions[,1]-ridge_model_y_predictions[,2])^2)/sum((ridge_model_y_predictions[,2]-sum(ridge_model_y_predictions[,2])/500)^2))`|   `r (1/500) * sum((ridge_model_y_predictions[,2]-ridge_model_y_predictions[,1])^2)`|
+|Lasso Regression | `r 1-(sum((lasso_model_y_predictions[,1]-lasso_model_y_predictions[,2])^2)/sum((lasso_model_y_predictions[,2]-sum(lasso_model_y_predictions[,2])/500)^2))`|   `r (1/500) * sum((lasso_model_y_predictions[,2]-lasso_model_y_predictions[,1])^2)`||
+
+There is a plot above this
 
 # Investigation - Principle Component Analysis
-
-
 
 # Conclusion
 
