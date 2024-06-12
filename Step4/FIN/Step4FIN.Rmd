@@ -206,7 +206,7 @@ When Lambda equals 0.3643727, the R-Squared is 0.9935687. This implies that the 
 
 ```{r}
 temp_lasso <- glmnet(x, y, alpha = 1, lambda = best_lambda)
-coef(temp_ridge)
+coef(temp_lasso)
 ```
 
 # Comparison of our Models
