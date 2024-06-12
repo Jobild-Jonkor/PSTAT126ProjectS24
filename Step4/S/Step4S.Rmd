@@ -173,8 +173,11 @@ In this plot, predictors that are grouped together are correlated to each other.
 
 ### Analysis
 
-By looking at our calculations and visualizations, we can see that the first two components capture almost all of the variance in our predictors, so we would select these for our model. The weights of component one are fairly evenly distributed over the predictors while component two puts more weight on stolen basees and triples.
+By looking at our calculations and visualizations, we can see that the first two components capture almost all of the variance in our predictors, so we would select these for our model. The weights of component one are fairly evenly distributed over the predictors while component two puts more weight on stolen bases and triples.
 
 ### Problems that Could Arise
 
 If the data is not a random sample from the population, then the variables will be measured on some arbitrary scale that depends on the sampling design since the sample standard deviations used to standardize the variables will not align with the population. Our sample is a random sample from our population, so we do not run into this issue.
+
+## conclusion
+Our innovative step using principal component analysis showed us that we can take linear combinations of our predictors to decrease our number of regressors to two.
