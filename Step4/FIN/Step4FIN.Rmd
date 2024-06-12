@@ -142,7 +142,7 @@ vif(modmat)
 ```
 ## Analysis
 
-When looking at our complete set of predictors, At_Bat, Doubles, and Triples are highly correlated to one another and also have the largest effect on the variance of our model by a significant margin. As a result, we concluded that they can not be included in the model of all predictors unless we are willing to sacrifice the fit and predictive accuracy of the model. If we wanted to train a model that uses all of the predictors, we would want to use a shrinkage method such as a Ridge or Lasso regression.
+When looking at our complete set of predictors, Doubles and Singles are highly correlated with one another and also have the largest effect on the variance of our model by a significant margin. As a result, we concluded that they can not be included in the model of all predictors unless we are willing to sacrifice the fit and predictive accuracy of the model. However, If we wanted to train a model that uses all of the predictors, we would want to use a shrinkage method such as a Ridge or Lasso regression.
 
 # Ridge Regression
 
@@ -188,7 +188,7 @@ temp_ridge <- cv.glmnet(x, y, alpha = 0)
 coef(temp_ridge)
 ```
 
-In observing our coefficients, we can see that Triples have the largest effect (an increase of 1.6434 expected runs per Triple) on the expected number of Runs and that every predictor contributes some information to the model.
+In observing our coefficients, we can see that Triples have the largest effect (an increase of 1.9420 expected runs per Triple) on the expected number of Runs and that every predictor contributes some information to the model.
 
 # Lasso Regression
 
@@ -224,7 +224,7 @@ sse <- sum((y_predicted - y)^2)
 rsq <- 1-(sse/sst)
 ```
 
-When Lambda equals `best_lambda`, the R-Squared is `r rsq`. This implies that the model explains approximately `r round(rsq*100,2)`% of the variation in the response in our training data set.
+When Lambda equals `r `best_lambda`, the R-Squared is `r rsq`. This implies that the model explains approximately `r round(rsq*100,2)`% of the variation in the response in our training data set.
 
 #### Coefficient Analysis
 
@@ -233,7 +233,7 @@ temp_lasso <- glmnet(x, y, alpha = 1, lambda = best_lambda)
 coef(temp_lasso)
 ```
 
-Through observing our coefficients, we can observe that Triples and Home Runs have a much larger effect on the expected number of Runs than any other predictor in a lasso regression model. Intentional walks also decrease the expected number of runs and At Bats can be removed without consequence. Since a lasso regression punishes an increase in predictors more harshly, this is likely why At Bats were removed from the model in the lasso regression while they were left in (with a very small value) in the Ridge Regression.
+Through observing our coefficients, we can observe that Triples and Home Runs have a much larger effect on the expected number of Runs than any other predictor in a lasso regression model. Intentional walks also decreases the expected number of runs and no predictor can be removed without consequence.
 
 # Comparison of our Models
 
