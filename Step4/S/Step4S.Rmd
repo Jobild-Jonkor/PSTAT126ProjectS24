@@ -172,6 +172,7 @@ fviz_pca_var(data.pca, col.var = "cos2",
 In this plot, predictors that are grouped together are correlated to each other. In our case, home runs, intentional walks, hit by pitches, walks, doubles and singles are positively correlated together in both components. Additionally, stolen bases and triples are correlated to each other positively in component one and negatively in component two. Finally, from this plot we can see that predictors that are farther from the origin and closer to green (representing a high square cosine) are better represented. For our predictors, they are all represented fairly similarly, with doubles being the most and hit by pitches and intentional walks falling behind.
 
 ### Analysis
+
 By looking at our calculations and visualizations, we can see that the first two components capture almost all of the variance in our predictors, so we would select these for our model. The weights of component one are fairly evenly distributed over the predictors while component two puts more weight on stolen basees and triples.
 
 ### Problems that Could Arise
