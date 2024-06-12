@@ -94,7 +94,7 @@ batting <-  merge(batting, players, by="player_id" )
 ```{r}
 # x and y setup with current dataset
 y <- batting$RUNS
-x <- data.matrix(batting[, c('AT_BAT', 'HOME_RUNS', 'SINGLES', 'WALKS', 'DOUBLE', 'INT_WALKS', 'STOLEN_BASES', 'HIT_BY_PITCH')])
+x <- data.matrix(batting[, c('AT_BAT', 'TRIPLE', 'HOME_RUNS', 'SINGLES', 'WALKS', 'DOUBLE', 'INT_WALKS', 'STOLEN_BASES', 'HIT_BY_PITCH')])
 ```
 
 
@@ -108,6 +108,38 @@ slm <- lm(RUNS~DOUBLE, data = batting)
 # Introduction
 
 Using the "History of Baseball" data set, we analyzed how our predictors (singles, doubles, triples, home runs, walks, intentional walks, hit by pitches, stolen bases, BMI, and batting hand) affected the runs scores by individual players. We sampled player statistics randomly from games played between 2000-2015, which allowed us to get an accurate representation of the population of all players who played between 2000 and 2015. Using both Ridge Regression and LASSO, we shrunk the size of some predictors to obtain estimates with smaller variance for higher precision. 
+
+# Colinearity
+
+### Correlation Table
+
+```{r}
+tempco <- round(cor(batting[,c('AT_BAT', 'TRIPLE', 'HOME_RUNS', 'SINGLES', 'WALKS', 'DOUBLE', 'INT_WALKS', 'STOLEN_BASES', 'HIT_BY_PITCH')]), 2)
+ik <- 1
+```
+
+|    |AB|T|HR|S|W|D|IW|SB|HBP|
+|:-----|---:|---:|---:|------:|---:|---:|-----:|-----:|-----:|
+|AT_BAT (AB)|`r tempco[ik,1]`|`r tempco[ik,2]`|`r tempco[ik,3]`|`r tempco[ik,4]`|`r tempco[ik,5]`|`r tempco[ik,6]`|`r tempco[ik,7]`|`r tempco[ik,8]`|`r tempco[ik,9]` `r ik <- ik+1`|
+|TRIPLE (T)|`r tempco[ik,1]`|`r tempco[ik,2]`|`r tempco[ik,3]`|`r tempco[ik,4]`|`r tempco[ik,5]`|`r tempco[ik,6]`|`r tempco[ik,7]`|`r tempco[ik,8]`|`r tempco[ik,9]` `r ik <- ik+1`|
+|HOME_RUNS (HR)|`r tempco[ik,1]`|`r tempco[ik,2]`|`r tempco[ik,3]`|`r tempco[ik,4]`|`r tempco[ik,5]`|`r tempco[ik,6]`|`r tempco[ik,7]`|`r tempco[ik,8]`|`r tempco[ik,9]` `r ik <- ik+1`|
+|SINGLES (S)|`r tempco[ik,1]`|`r tempco[ik,2]`|`r tempco[ik,3]`|`r tempco[ik,4]`|`r tempco[ik,5]`|`r tempco[ik,6]`|`r tempco[ik,7]`|`r tempco[ik,8]`|`r tempco[ik,9]` `r ik <- ik+1`|
+|WALKS (W)|`r tempco[ik,1]`|`r tempco[ik,2]`|`r tempco[ik,3]`|`r tempco[ik,4]`|`r tempco[ik,5]`|`r tempco[ik,6]`|`r tempco[ik,7]`|`r tempco[ik,8]`|`r tempco[ik,9]` `r ik <- ik+1`|
+|DOUBLE (D)|`r tempco[ik,1]`|`r tempco[ik,2]`|`r tempco[ik,3]`|`r tempco[ik,4]`|`r tempco[ik,5]`|`r tempco[ik,6]`|`r tempco[ik,7]`|`r tempco[ik,8]`|`r tempco[ik,9]` `r ik <- ik+1`|
+|INT_WALKS (IW)|`r tempco[ik,1]`|`r tempco[ik,2]`|`r tempco[ik,3]`|`r tempco[ik,4]`|`r tempco[ik,5]`|`r tempco[ik,6]`|`r tempco[ik,7]`|`r tempco[ik,8]`|`r tempco[ik,9]` `r ik <- ik+1`|
+|STOLEN_BASES (SB)|`r tempco[ik,1]`|`r tempco[ik,2]`|`r tempco[ik,3]`|`r tempco[ik,4]`|`r tempco[ik,5]`|`r tempco[ik,6]`|`r tempco[ik,7]`|`r tempco[ik,8]`|`r tempco[ik,9]` `r ik <- ik+1`|
+|HIT_BY_PITCH (HBP)|`r tempco[ik,1]`|`r tempco[ik,2]`|`r tempco[ik,3]`|`r tempco[ik,4]`|`r tempco[ik,5]`|`r tempco[ik,6]`|`r tempco[ik,7]`|`r tempco[ik,8]`|`r tempco[ik,9]` `r ik <- ik+1`||
+
+
+### Variance Inflation factor Table
+
+```{r}
+modmat <- model.matrix(lm(RUNS~AT_BAT + TRIPLE + HOME_RUNS + SINGLES + WALKS + DOUBLE + INT_WALKS + STOLEN_BASES + HIT_BY_PITCH, data=batting))
+vif(modmat)
+```
+## Analysis
+
+When looking at our complete set of predictors, At_Bat, Doubles, and Triples are highly correlated to one another and also have the largest effect on the variance of our model by a significant margin. As a result, we concluded that they can not be included in the model of all predictors unless we are willing to sacrifice the fit and predictive accuracy of the model. If we wanted to train a model that uses all of the predictors, we would want to use a shrinkage method such as a Ridge or Lasso regression.
 
 # Ridge Regression
 
@@ -134,7 +166,7 @@ best_lambda_r
 ```
 
 
-### Model Analysis
+## Model Analysis
 
 
 
@@ -151,7 +183,7 @@ rsq <- 1-(sse/sst)
 rsq
 ```
 
-When Lambda equals 24.53741, the R-Squared is 0.9914. This implies that the model explains approximately 99.14% of the variation in the response values..
+When Lambda equals `r best_lambda_r`, the R-Squared is `r rsq`. This implies that the model explains approximately `r round(rsq*100,2)`% of the variation in the response in our training data set.
 
 #### Coefficient Analysis
 
@@ -159,6 +191,8 @@ When Lambda equals 24.53741, the R-Squared is 0.9914. This implies that the mode
 temp_ridge <- cv.glmnet(x, y, alpha = 0)
 coef(temp_ridge)
 ```
+
+In observing our coefficients, we can see that Triples have the largest effect (an increase of 1.6434 expected runs per Triple) on the expected number of Runs and that every predictor contributes some information to the model.
 
 # Lasso Regression
 
@@ -185,7 +219,7 @@ best_lambda
 
 
 
-### Model Analysis
+## Model Analysis
 
 #### R-Squared Analysis
 ```{r}
@@ -197,10 +231,9 @@ sst <- sum((y-mean(y))^2)
 sse <- sum((y_predicted - y)^2)
 
 rsq <- 1-(sse/sst)
-#rsq
 ```
 
-When Lambda equals 0.3643727, the R-Squared is 0.9935687. This implies that the model explains approximately 99.36% of the variation in the response values.
+When Lambda equals `best_lambda`, the R-Squared is `r rsq`. This implies that the model explains approximately `r round(rsq*100,2)`% of the variation in the response in our training data set.
 
 #### Coefficient Analysis
 
@@ -209,9 +242,10 @@ temp_lasso <- glmnet(x, y, alpha = 1, lambda = best_lambda)
 coef(temp_lasso)
 ```
 
+Through observing our coefficients, we can observe that Triples and Home Runs have a much larger effect on the expected number of Runs than any other predictor in a lasso regression model. Intentional walks also decrease the expected number of runs and At Bats can be removed without consequence. Since a lasso regression punishes an increase in predictors more harshly, this is likely why At Bats were removed from the model in the lasso regression while they were left in (with a very small value) in the Ridge Regression.
+
 # Comparison of our Models
 
-There is a plot below this
 
 ```{r, echo =FALSE}
 batting <- dbGetQuery(ball, "
@@ -272,7 +306,7 @@ batting <-  merge(batting, players, by="player_id" )
 
 ```
 ```{r}
-x <- data.matrix(batting[, c('AT_BAT', 'HOME_RUNS', 'SINGLES', 'WALKS', 'DOUBLE', 'INT_WALKS', 'STOLEN_BASES', 'HIT_BY_PITCH')])
+x <- data.matrix(batting[, c('AT_BAT', 'TRIPLE', 'HOME_RUNS', 'SINGLES', 'WALKS', 'DOUBLE', 'INT_WALKS', 'STOLEN_BASES', 'HIT_BY_PITCH')])
 ```
 
 ```{r}
@@ -294,7 +328,6 @@ slm_y_predictions[,1] <- predict(slm, newdata = batting)
 slm_y_predictions[,2] <- batting$RUNS
 ```
 
-\newpage
 
 ```{r}
 #Rsquare finder
@@ -311,22 +344,24 @@ slm_y_predictions[,2] <- batting$RUNS
 ```{r, fig.width=7,fig.height=2, fig.cap="A comparison of the Linear Models"}
 ggplot() + 
   
-  geom_point(aes(x=Prediction, y=Actual, color="SLM"), slm_y_predictions, size =0.5 )+
-  geom_smooth(aes(x=Prediction, y=Actual, color="SLM"), slm_y_predictions, method = lm, fullrange =TRUE)+
+  geom_point(aes(x=Prediction, y=Actual, color="SLM"), slm_y_predictions, size =0.25 )+
+  geom_smooth(aes(x=Prediction, y=Actual, color="SLM"), slm_y_predictions, method = lm, fullrange =TRUE, size = 0.75)+
   
-  geom_point(aes(x=Prediction, y=Actual, color="MLR"), stat_model_y_predictions,size = 0.5) + 
-  geom_smooth(aes(x=Prediction, y=Actual, color="MLR"), stat_model_y_predictions, method = lm, fullrange =TRUE)+
+  geom_point(aes(x=Prediction, y=Actual, color="MLR"), stat_model_y_predictions,size = 0.25) + 
+  geom_smooth(aes(x=Prediction, y=Actual, color="MLR"), stat_model_y_predictions, method = lm, fullrange =TRUE, size = 0.75)+
   
-  geom_point(aes(x=Prediction, y=Actual, color="Ridge Model"), ridge_model_y_predictions, size =0.5)+
-  geom_smooth(aes(x=Prediction, y=Actual, color="Ridge Model"), ridge_model_y_predictions, method = lm, fullrange =TRUE)+
+  geom_point(aes(x=Prediction, y=Actual, color="Ridge Model"), ridge_model_y_predictions, size =0.25)+
+  geom_smooth(aes(x=Prediction, y=Actual, color="Ridge Model"), ridge_model_y_predictions, method = lm, fullrange =TRUE, size = 0.75)+
   
-  geom_point(aes(x=Prediction, y=Actual, color="Lasso Model"), lasso_model_y_predictions, size =0.5 )+
-  geom_smooth(aes(x=Prediction, y=Actual, color="Lasso Model"), lasso_model_y_predictions, method = lm, fullrange =TRUE)+
+  geom_point(aes(x=Prediction, y=Actual, color="Lasso Model"), lasso_model_y_predictions, size =0.25 )+
+  geom_smooth(aes(x=Prediction, y=Actual, color="Lasso Model"), lasso_model_y_predictions, method = lm, fullrange =TRUE, size = 0.75)+
   
 
   
   labs(color = "Model")
 ```
+
+### MSE and $R^2$ By model
 
 |       Model Type          |  $R^2$ | MSE |
 |:-----------------|----:|---:|
@@ -335,7 +370,7 @@ ggplot() +
 |Ridge Regression | `r 1-(sum((ridge_model_y_predictions[,1]-ridge_model_y_predictions[,2])^2)/sum((ridge_model_y_predictions[,2]-sum(ridge_model_y_predictions[,2])/500)^2))`|   `r (1/500) * sum((ridge_model_y_predictions[,2]-ridge_model_y_predictions[,1])^2)`|
 |Lasso Regression | `r 1-(sum((lasso_model_y_predictions[,1]-lasso_model_y_predictions[,2])^2)/sum((lasso_model_y_predictions[,2]-sum(lasso_model_y_predictions[,2])/500)^2))`|   `r (1/500) * sum((lasso_model_y_predictions[,2]-lasso_model_y_predictions[,1])^2)`||
 
-There is a plot above this
+The graph and table above were generated for several different sets of 500 new random observations from our original dataset. In each case, the patterns displayed were consistent with those show above. The Lasso Regression has the lowest Mean Square Error and the Highest $R^2$ of the models--with the Ridge Regression close behind. On the other hand, the Singular linear regression has the lowest $R^2$ and MSE. The Multi-Linear Regression has a slightly lower $R^2$ and MSE than the Lasso and Ridge Regressions. However, it is very close to the shrinkage models and fits the data well.
 
 # Investigation - Principle Component Analysis
 
@@ -343,7 +378,6 @@ Waiting for sam's work
 
 # Conclusion
 
-GDRIVE - PSTAT126_PROJ_STEP_4_CONC
+If we want to include as many of our predictors as possible, there are issues with collinearity among some predictors. To mitigate this issue, a Ridge or Lasso regression can be employed, with the Lasso regression with a $\lambda$ value equal to `r best_lambda` being the best fit. However, for ease of explanation one could consider using the Multi-Linear Regression we created in step 3 as it has much fewer predictors and the fit and predictive accuracy of the model is very similar to the models generated through Shrinkage methods.
 
-(Everything is still temp above, will finalize tomorrow well before 3pm)
-
+INCLUDE BIT ABOUT SAMS WORK
