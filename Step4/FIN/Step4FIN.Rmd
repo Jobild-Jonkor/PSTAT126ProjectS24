@@ -164,15 +164,9 @@ plot(cv_model_ridge)
 
 ```
 
-We found that the MSE was minimized when $\lambda$ is equal to:
-```{r}
-best_lambda_r
-```
-
+We found that the MSE was minimized when $\lambda$ is equal to: `r best_lambda_r`
 
 ## Model Analysis
-
-
 
 #### R-Squared Analysis
 ```{r}
@@ -216,12 +210,7 @@ best_lambda <- cv_model$lambda.min
 plot(cv_model)
 ```
 
-We found that the MSE was minimized when $\lambda$ is equal to:
-```{r}
-best_lambda
-```
-
-
+We found that the MSE was minimized when $\lambda$ is equal to: `r best_lambda`
 
 ## Model Analysis
 
@@ -383,9 +372,8 @@ Let $\mathbf{X'} = (X_1, X_2,...X_k)$ and $\mathbf{u'}$ be a $p\times1$ vector o
 
 First we normalize the data by dividing by the sample standard deviation. Then, we use the sample correlation matrix to compute our eigenvalues ($\hat{\lambda}_j$) and select the values with the highest variances. Now, we compute the corresponding eigenvectors ($\mathbf{\hat{u}}_j$) and multiply them by $\mathbf{X'}$. These are our principal components $Z_j$.
 
-### Calculations
 
-```{r}
+```{r include =FALSE}
 # Removing unnecessary columns
 numerical_data <- batting[,4:11]
 
@@ -401,9 +389,9 @@ data.pca$loadings[, 1:2] # weights of component one are pretty evenly spread, wh
 ```
 ### Visualizations
 
-```{r}
+```{r, fig.cap = "Component contributions to the total variance"}
 # Scree plot - importance of each component//contribution to total variance
-fviz_eig(data.pca, addlabels=TRUE)
+fviz_eig(data.pca, addlabels=TRUE, main = "")
 ```
 This plot displays the eigenvalues and shows us that the first two components contribute the most the total variance.
 
