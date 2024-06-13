@@ -101,7 +101,16 @@ batting <-  merge(batting, players, by="player_id" )
 
 # Step 1
 
-# Step 2
+
+# Step 2-3
+
+```{r}
+library(lmtest)
+DOUBLE <- batting$DOUBLE
+g <- lm(batting$RUNS~DOUBLE ,data=batting)
+dwtest(batting$RUNS ~ batting$DOUBLE, data=batting)
+```
+
 
 ```{r fig.cap= "Scatter plot of the relationship between Runs and Doubles"}
 par(mfrow = c(1, 2))
@@ -125,7 +134,6 @@ qqline(batting$RUNS)
 **- Normality:** While our errors do not appear to be normally distributed, our large sample size allows us to leverage the Central Limit Theorem to make meaningful analysis.
 
 ```{r include=FALSE}
-
 slm <- summary(g)
 anova_lm <- anova(g)
 ```
@@ -205,18 +213,13 @@ We used a stepwise search to create the best model for our data. For a size of 4
 
 Between the two models we created, the statistical model and computational model, we selected the statistical model. The reason behind this selection is that the statistical model has a larger $R_{adj}^2$ value and we want to explain as much of the variance as possible in our model.
 
-# Step 3
 
 # Step 4
 
 We implemented a Ridge and Lasso regression on the entire set of predictors to make a model that fits well. While the Lasso regression did not eliminate any predictors, it did result in the best fit of all the previoud models as can be demonstrated in the plot and table below.
 
+```{r, echo =FALSE}
 
-
-
-
-
-```{r}
 
 y <- batting$RUNS
 x <- data.matrix(batting[, c('TRIPLE', 'HOME_RUNS', 'SINGLES', 'WALKS', 'DOUBLE', 'INT_WALKS', 'STOLEN_BASES', 'HIT_BY_PITCH')])
@@ -224,28 +227,45 @@ x <- data.matrix(batting[, c('TRIPLE', 'HOME_RUNS', 'SINGLES', 'WALKS', 'DOUBLE'
 stat_model <- lm(RUNS~HOME_RUNS + SINGLES + WALKS + STOLEN_BASES, data = batting)
 slm <- lm(RUNS~DOUBLE, data = batting)
 
-
-# find optimal lambda value that minimizes test MSE
-best_lambda_r <- cv_model_ridge$lambda.min
-
 cv_model <- cv.glmnet(x, y, alpha = 1)
-
-# find optimal lambda value that minimizes test MSE
-best_lambda <- cv_model$lambda.min
-
 model <- glmnet(x, y, alpha = 1)
 
-ridge_model <- glmnet(x, y, alpha = 0)
-
 cv_model_ridge <- cv.glmnet(x, y, alpha = 0)
+ridge_model <- glmnet(x, y, alpha = 0)
+model <- glmnet(x, y, alpha = 1)
+
+
+best_lambda_r <- cv_model_ridge$lambda.min
+best_lambda <- cv_model$lambda.min
+
+
+
+
+
 
 ```
 
 
 
 
+Coefficients of the Ridge Model
+```{r}
+temp_ridge <- cv.glmnet(x, y, alpha = 0)
+coef(temp_ridge)
+```
 
-```{r, echo =FALSE}
+In observing our coefficients, we can see that Triples have the largest effect (an increase of 1.9420 expected runs per Triple) on the expected number of Runs and that every predictor contributes some information to the model.
+
+Coefficients of the Lasso Model
+```{r}
+temp_lasso <- glmnet(x, y, alpha = 1, lambda = best_lambda)
+coef(temp_lasso)
+```
+
+Through observing our coefficients, we can observe that Triples and Home Runs have a much larger effect on the expected number of Runs than any other predictor in a lasso regression model. Intentional walks also decreases the expected number of runs and no predictor can be removed without consequence.
+
+
+```{r}
 batting <- dbGetQuery(ball, "
                             SELECT
                             sum(ab) AS AT_BAT,
@@ -301,22 +321,8 @@ for ( x in 1:17918)
 }
 
 batting <-  merge(batting, players, by="player_id" )
-
-```
-```{r}
 x <- data.matrix(batting[, c('TRIPLE', 'HOME_RUNS', 'SINGLES', 'WALKS', 'DOUBLE', 'INT_WALKS', 'STOLEN_BASES', 'HIT_BY_PITCH')])
 
-
-
-
-
-
-
-
-
-```
-
-```{r}
 ridge_model_y_predictions <- data.frame(Prediction = 1:500, Actual= 1:500)
 ridge_model_y_predictions[,1] <- predict(ridge_model, s = best_lambda_r, newx = x)
 ridge_model_y_predictions[,2] <- batting$RUNS
@@ -333,7 +339,14 @@ stat_model_y_predictions[,2] <- batting$RUNS
 slm_y_predictions <- data.frame(Prediction = 1:500, Actual = 1:500)
 slm_y_predictions[,1] <- predict(slm, newdata = batting)
 slm_y_predictions[,2] <- batting$RUNS
+
 ```
+
+
+
+
+
+
 
 ```{r, fig.width=7,fig.height=2, fig.cap="A comparison of the Linear Models"}
 ggplot() + 
@@ -352,3 +365,12 @@ ggplot() +
   
   labs(color = "Model")
 ```
+
+| Model Type       |                                                                                                                                                      $R^2$ |                                                                                MSE |
+|:------------------------------------------|--------------:|--------------:|
+| SLR              |                                 `r 1-(sum((slm_y_predictions[,1]-slm_y_predictions[,2])^2)/sum((slm_y_predictions[,2]-sum(slm_y_predictions[,2])/500)^2))` |                 `r (1/500) * sum((slm_y_predictions[,2]-slm_y_predictions[,1])^2)` |
+| MLR              |     `r 1-(sum((stat_model_y_predictions[,1]-stat_model_y_predictions[,2])^2)/sum((stat_model_y_predictions[,2]-sum(stat_model_y_predictions[,2])/500)^2))` |   `r (1/500) * sum((stat_model_y_predictions[,2]-stat_model_y_predictions[,1])^2)` |
+| Ridge Regression | `r 1-(sum((ridge_model_y_predictions[,1]-ridge_model_y_predictions[,2])^2)/sum((ridge_model_y_predictions[,2]-sum(ridge_model_y_predictions[,2])/500)^2))` | `r (1/500) * sum((ridge_model_y_predictions[,2]-ridge_model_y_predictions[,1])^2)` |
+| Lasso Regression | `r 1-(sum((lasso_model_y_predictions[,1]-lasso_model_y_predictions[,2])^2)/sum((lasso_model_y_predictions[,2]-sum(lasso_model_y_predictions[,2])/500)^2))` | `r (1/500) * sum((lasso_model_y_predictions[,2]-lasso_model_y_predictions[,1])^2)` |
+
+The graph and table above were generated for several different sets of 500 new random observations from our original dataset. In each case, the patterns displayed were consistent with those show above. The Lasso Regression has the lowest Mean Square Error and the Highest $R^2$ of the models--with the Ridge Regression close behind. On the other hand, the Singular linear regression has the lowest $R^2$ and MSE. The Multi-Linear Regression has a slightly lower $R^2$ and MSE than the Lasso and Ridge Regressions. However, it is very close to the shrinkage models and fits the data well--so it might be a good idea to use it if ease of explainability is important.
