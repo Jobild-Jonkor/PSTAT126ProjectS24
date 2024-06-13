@@ -123,7 +123,7 @@ ik <- 1
 
 |                    |                T |               HR |                S |                W |                D |               IW |               SB |                             HBP |
 |:-------|-------:|-------:|-------:|-------:|-------:|-------:|-------:|-------:|
-| TRIPLE (T))        | `r tempco[ik,1]` | `r tempco[ik,2]` | `r tempco[ik,3]` | `r tempco[ik,4]` | `r tempco[ik,5]` | `r tempco[ik,6]` | `r tempco[ik,7]` | `r tempco[ik,8]` `r ik <- ik+1` |
+| TRIPLE (T)        | `r tempco[ik,1]` | `r tempco[ik,2]` | `r tempco[ik,3]` | `r tempco[ik,4]` | `r tempco[ik,5]` | `r tempco[ik,6]` | `r tempco[ik,7]` | `r tempco[ik,8]` `r ik <- ik+1` |
 | HOME_RUNS (HR)     | `r tempco[ik,1]` | `r tempco[ik,2]` | `r tempco[ik,3]` | `r tempco[ik,4]` | `r tempco[ik,5]` | `r tempco[ik,6]` | `r tempco[ik,7]` | `r tempco[ik,8]` `r ik <- ik+1` |
 | SINGLES (S)        | `r tempco[ik,1]` | `r tempco[ik,2]` | `r tempco[ik,3]` | `r tempco[ik,4]` | `r tempco[ik,5]` | `r tempco[ik,6]` | `r tempco[ik,7]` | `r tempco[ik,8]` `r ik <- ik+1` |
 | WALKS (W)          | `r tempco[ik,1]` | `r tempco[ik,2]` | `r tempco[ik,3]` | `r tempco[ik,4]` | `r tempco[ik,5]` | `r tempco[ik,6]` | `r tempco[ik,7]` | `r tempco[ik,8]` `r ik <- ik+1` |
@@ -183,6 +183,8 @@ When Lambda equals `r best_lambda_r`, the R-Squared is `r rsq`. This implies tha
 
 #### Coefficient Analysis
 
+
+
 ```{r}
 temp_ridge <- cv.glmnet(x, y, alpha = 0)
 coef(temp_ridge)
@@ -225,9 +227,10 @@ sse <- sum((y_predicted - y)^2)
 rsq <- 1-(sse/sst)
 ```
 
-When Lambda equals `r`best_lambda`, the R-Squared is`r rsq`. This implies that the model explains approximately`r round(rsq\*100,2)\`% of the variation in the response in our training data set.
+When Lambda equals `r best_lambda`, the R-Squared is `r rsq`. This implies that the model explains approximately`r round(rsq*100,2)`% of the variation in the response in our training data set.
 
 #### Coefficient Analysis
+
 
 ```{r}
 temp_lasso <- glmnet(x, y, alpha = 1, lambda = best_lambda)
