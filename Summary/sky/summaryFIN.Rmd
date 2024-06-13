@@ -1,5 +1,5 @@
 ---
-title: "126 Data Project, Step 4"
+title: "126 Data Project, Summary"
 date: "Sam Ream, Valeria Lopez, Skyler Yee"
 output:
   pdf_document:
@@ -96,8 +96,6 @@ for ( x in 1:17918)
 
 batting <-  merge(batting, players, by="player_id" )
 ```
-
-# Summary
 
 # Step 1
 
@@ -216,7 +214,25 @@ Between the two models we created, the statistical model and computational model
 
 # Step 4
 
-We implemented a Ridge and Lasso regression on the entire set of predictors to make a model that fits well. While the Lasso regression did not eliminate any predictors, it did result in the best fit of all the previoud models as can be demonstrated in the plot and table below.
+```{r}
+tempco <- round(cor(batting[,c('TRIPLE', 'HOME_RUNS', 'SINGLES', 'WALKS', 'DOUBLE', 'INT_WALKS', 'STOLEN_BASES', 'HIT_BY_PITCH')]), 2)
+ik <- 1
+```
+
+### Collinearity table
+
+|                    |                T |               HR |                S |                W |                D |               IW |               SB |                             HBP |
+|:-------|-------:|-------:|-------:|-------:|-------:|-------:|-------:|-------:|
+| TRIPLE (T)        | `r tempco[ik,1]` | `r tempco[ik,2]` | `r tempco[ik,3]` | `r tempco[ik,4]` | `r tempco[ik,5]` | `r tempco[ik,6]` | `r tempco[ik,7]` | `r tempco[ik,8]` `r ik <- ik+1` |
+| HOME_RUNS (HR)     | `r tempco[ik,1]` | `r tempco[ik,2]` | `r tempco[ik,3]` | `r tempco[ik,4]` | `r tempco[ik,5]` | `r tempco[ik,6]` | `r tempco[ik,7]` | `r tempco[ik,8]` `r ik <- ik+1` |
+| SINGLES (S)        | `r tempco[ik,1]` | `r tempco[ik,2]` | `r tempco[ik,3]` | `r tempco[ik,4]` | `r tempco[ik,5]` | `r tempco[ik,6]` | `r tempco[ik,7]` | `r tempco[ik,8]` `r ik <- ik+1` |
+| WALKS (W)          | `r tempco[ik,1]` | `r tempco[ik,2]` | `r tempco[ik,3]` | `r tempco[ik,4]` | `r tempco[ik,5]` | `r tempco[ik,6]` | `r tempco[ik,7]` | `r tempco[ik,8]` `r ik <- ik+1` |
+| DOUBLE (D)         | `r tempco[ik,1]` | `r tempco[ik,2]` | `r tempco[ik,3]` | `r tempco[ik,4]` | `r tempco[ik,5]` | `r tempco[ik,6]` | `r tempco[ik,7]` | `r tempco[ik,8]` `r ik <- ik+1` |
+| INT_WALKS (IW)     | `r tempco[ik,1]` | `r tempco[ik,2]` | `r tempco[ik,3]` | `r tempco[ik,4]` | `r tempco[ik,5]` | `r tempco[ik,6]` | `r tempco[ik,7]` | `r tempco[ik,8]` `r ik <- ik+1` |
+| STOLEN_BASES (SB)  | `r tempco[ik,1]` | `r tempco[ik,2]` | `r tempco[ik,3]` | `r tempco[ik,4]` | `r tempco[ik,5]` | `r tempco[ik,6]` | `r tempco[ik,7]` | `r tempco[ik,8]` `r ik <- ik+1` |
+| HIT_BY_PITCH (HBP) | `r tempco[ik,1]` | `r tempco[ik,2]` | `r tempco[ik,3]` | `r tempco[ik,4]` | `r tempco[ik,5]` | `r tempco[ik,6]` | `r tempco[ik,7]` | `r tempco[ik,8]` `r ik <- ik+1` |
+
+As we observed the collinearity between certain predictors to be high as seen in the table above, we implemented a Ridge and Lasso regression on the entire set of predictors to make a model that fits well and utilizes all predictors. While the Lasso regression did not eliminate any predictors, it did result in the best fit of all the previous models as can be demonstrated in the plot and table below.
 
 ```{r, echo =FALSE}
 
@@ -373,4 +389,6 @@ ggplot() +
 | Ridge Regression | `r 1-(sum((ridge_model_y_predictions[,1]-ridge_model_y_predictions[,2])^2)/sum((ridge_model_y_predictions[,2]-sum(ridge_model_y_predictions[,2])/500)^2))` | `r (1/500) * sum((ridge_model_y_predictions[,2]-ridge_model_y_predictions[,1])^2)` |
 | Lasso Regression | `r 1-(sum((lasso_model_y_predictions[,1]-lasso_model_y_predictions[,2])^2)/sum((lasso_model_y_predictions[,2]-sum(lasso_model_y_predictions[,2])/500)^2))` | `r (1/500) * sum((lasso_model_y_predictions[,2]-lasso_model_y_predictions[,1])^2)` |
 
-The graph and table above were generated for several different sets of 500 new random observations from our original dataset. In each case, the patterns displayed were consistent with those show above. The Lasso Regression has the lowest Mean Square Error and the Highest $R^2$ of the models--with the Ridge Regression close behind. On the other hand, the Singular linear regression has the lowest $R^2$ and MSE. The Multi-Linear Regression has a slightly lower $R^2$ and MSE than the Lasso and Ridge Regressions. However, it is very close to the shrinkage models and fits the data well--so it might be a good idea to use it if ease of explainability is important.
+### Analysis
+
+As some predictors had a very high level of collinearity, we elected to use shrinkage methods to fit a model to all predictors. The graph and table above were generated for several different sets of 500 new random observations from our original data set. In each case, the patterns displayed were consistent with those show above. The Lasso Regression has the lowest Mean Square Error and the Highest $R^2$ of the models--with the Ridge Regression close behind. On the other hand, the Singular linear regression has the lowest $R^2$ and MSE. The Multi-Linear Regression has a slightly lower $R^2$ and MSE than the Lasso and Ridge Regressions. However, it is very close to the shrinkage models and fits the data well--so it might be a good idea to use it if ease of explainability is important.
