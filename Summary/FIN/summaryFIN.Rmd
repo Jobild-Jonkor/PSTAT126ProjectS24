@@ -99,6 +99,13 @@ batting <-  merge(batting, players, by="player_id" )
 
 # Step 1
 
+We selected “The History of Baseball” data set, which is a record of all the statistics of baseball players who have played in the MLB up until 2015. We sampled 500 players who played between 2000-2015 to capture the current state of the game. Our population is all of the MLB players from 2000-2015. We did not want to generalize the whole history of the MLB because the rules of the game and the strategies used by teams and players are always changing. Our predictors are singles, doubles, triples, home runs, walks, stolen bases, hit by pitches, intentional walks, BMI, and batting hand. Our objective was to predict the expected number of runs that future players will have on record, given observations from their past performances.
+
+
+```{r, eval = FALSE, fig.width=10, fig.height=10}
+ggpairs(batting, columns = 3:13)
+```
+Almost all of our predictors were highly positively correlated to one another. Additionally, most of our predictors were highly correlated to our response variable, Runs. 
 
 # Step 2-3
 
