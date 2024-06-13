@@ -99,103 +99,13 @@ batting <-  merge(batting, players, by="player_id" )
 
 # Summary
 
-```{r fig.cap= "Scatter plot of the relationship between Runs and Doubles"}
-par(mfrow = c(1, 2))
-plot(batting$DOUBLE, batting$RUNS, ylab = "Runs", xlab = "Doubles")
-abline(0,2.4, col="red",)
-abline(-150,2.4, col="blue",)
-abline(200,2.4, col="blue",)
+## Step 1: Prelimary Data Analysis
+
+We selected “The History of Baseball” data set, which is a record of all the statistics of baseball players who have played in the MLB up until 2015. We sampled 500 players who played between 2000-2015 to capture the current state of the game. Our population is all of the MLB players from 2000-2015. We did not want to generalize the whole history of the MLB because the rules of the game and the strategies used by teams and players are always changing. Our predictors are singles, doubles, triples, home runs, walks, stolen bases, hit by pitches, intentional walks, BMI, and batting hand. Our objective was to predict the expected number of runs that future players will have on record, given observations from their past performances.
+
+
+```{r, eval = FALSE, fig.width=10, fig.height=10}
+ggpairs(batting, columns = 3:13)
 ```
 
-```{r fig.cap= "QQ-Plot showing that the data is not normally distributed"}
-qqnorm(batting$RUNS)
-qqline(batting$RUNS)
-```
-
-**- Linearity:** All the points on the relationship plot above are arranged in a very linear way without transformations
-
-**- Constant Variance:** Almost all of the points have a similar distance from a proposed straight line.
-
-**- Independence:** With the knowledge that one batter hitting the ball well enough to get a double does not affect the likelihood of the next batter doing the same, we know that the predictors are independent of one another.
-
-**- Normality:** While our errors do not appear to be normally distributed, our large sample size allows us to leverage the Central Limit Theorem to make meaningful analysis.
-
-```{r include=FALSE}
-slm <- summary(g)
-anova_lm <- anova(g)
-```
-
-# Hypothesis Testing
-
-## Significance Test
-
-$$H_0: \beta_i=0$$
-
-$$H_a: \beta_1 \neq 0$$
-
-$$\alpha = 0.05$$
-
-```{r include=FALSE}
-test_stat <- slm$coefficients[,3][2]
-test_stat #102.942 # from slm
-p_value <- slm$coefficients[,4][2]
-p_value
-```
-
-$\textbf{Test Statistic =}\ 102.942$
-
-$\textbf{P Value} \approx 0$
-
-We reject $H_0$ at 0.05 level. Thus, the amount of doubles a player hits is a significant predictor of how many runs the player scores.
-
-# Fit of Model
-
-The $R^2$ value of our model is 0.9551, which means that the model explains 95.51% of the variance of the recorded events. Additionally, the residual plot in figure 3 shows how the data points share a similar spread which implies that the model is a good fit.
-
-```{r include=FALSE}
-summary(lm(batting$DOUBLE ~ batting$RUNS))
-```
-
-```{r fig.cap= "Residual Plot of the fitted model"}
-model <- lm(batting$RUNS ~ batting$DOUBLE)
-
-res <- resid(model)
-
-plot(fitted(model), res, ylab = "Residuals", xlab = "Fitted Model")
-```
-
-# Computational Models
-
-For our computational models, we used the predictors: Total Intentional Walks, Singles, Triples, Stolen Bases, and Home Runs obtained in a career. We selected these predictors because of their low correlation in addition to their interesting relation to obtained Runs.
-
-### Model 1 - Full Model ( $\Omega$ )
-
-$\mathbb{E}[Y]=\text{Intercept } + \text{Intentional Walks }+\text{Singles }+\text{Triples }+\text{Stolen Bases }+\text{Home Runs}+\epsilon$
-
-### Model 2 - Reduced Model ( $\omega$ )
-
-$\mathbb{E}[Y]=\text{Intercept } + \text{Singles }+\text{Triples }+\text{Home Runs}+\epsilon$
-
-### Comparison:
-
-$H_0: \beta \in \omega :\text{The Reduced Model is sufficient}$
-
-$H_\alpha: \beta \in \Omega \text{\\} \omega \in w :\text{The Reduced Model is not sufficient}$
-
-```{r}
-model_1 <- lm(RUNS~INT_WALKS + SINGLES + TRIPLE + STOLEN_BASES + HOME_RUNS, data = batting)
-model_2 <- lm(RUNS~SINGLES + TRIPLE + HOME_RUNS, data = batting)
-anova(model_1, model_2)
-```
-
-### Conclusion
-
-As we rejected \$H_0\$ in favor for \$H\_\\alpha\$, we can determine that the reduced model does not model the data well enough to justify the reduction in predictors. As such, we decided to use model 1, the full model, as our computational model.
-
-# Statistical Model
-
-We used a stepwise search to create the best model for our data. For a size of 4 predictors the variables home runs, singles, walks, and stolen bases create a well fit model.
-
-# Final Model Selection
-
-Between the two models we created, the statistical model and computational model, we selected the statistical model. The reason behind this selection is that the statistical model has a larger $R_{adj}^2$ value and we want to explain as much of the variance as possible in our model.
+Almost all of our predictors were highly positively correlated to one another. Additionally, most of our predictors were highly correlated to our response variable, Runs. 
